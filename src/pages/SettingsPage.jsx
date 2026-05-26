@@ -1,4 +1,4 @@
-import { ArrowLeft, Sun, Bell, Lock, Globe, Help, LogOut } from 'lucide-react'
+import { ArrowLeft, Sun, Bell, Lock, Globe, HelpCircle, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import Header from '../components/Header'
@@ -47,7 +47,7 @@ export default function SettingsPage() {
               <span className="text-gray-400">›</span>
             </button>
             <button className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 text-left border-t">
-              <span className="text-sm">Email adresim</span>
+              <span className="text-sm">Email manzilim</span>
               <span className="text-gray-400">›</span>
             </button>
             <button className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 text-left border-t">
@@ -175,7 +175,7 @@ export default function SettingsPage() {
           <div className="bg-white space-y-1">
             <button className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 text-left border-b">
               <div className="flex items-center gap-3 flex-1">
-                <Help size={20} className="text-primary" />
+                <HelpCircle size={20} className="text-primary" />
                 <span className="text-sm">Ko'mak markazi</span>
               </div>
               <span className="text-gray-400">›</span>

@@ -14,7 +14,7 @@ export default function HomePage() {
         {/* Greeting Section */}
         <div className="p-4">
           <h1 className="text-2xl font-bold mb-2">Xayrli tong, Sarah</h1>
-          <p className="text-gray-600">Tishlaring sog'lig'i haqida qayg'urish vaqti keldi.</p>
+          <p className="text-gray-600">Tishlaringiz sog'lig'i haqida qayg'urish vaqti keldi.</p>
         </div>
 
         {/* Search Bar */}
@@ -36,7 +36,7 @@ export default function HomePage() {
 
         {/* Upcoming Appointment */}
         <div className="px-4 py-4">
-          <h2 className="text-lg font-bold mb-3">Kelsagi qabul</h2>
+          <h2 className="text-lg font-bold mb-3">Kelasi qabul</h2>
           <div className="bg-blue-100 rounded-2xl p-4">
             <div className="flex gap-3">
               <img

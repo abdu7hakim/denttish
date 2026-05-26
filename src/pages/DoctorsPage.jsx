@@ -122,7 +122,7 @@ export default function DoctorsPage() {
                         <h3 className="font-bold">{doctor.name}</h3>
                         {doctor.verified && (
                           <span className="text-xs bg-blue-100 text-primary px-2 py-0.5 rounded">
-                            ✓ Tasdiqqlangan
+                            ✓ Tasdiqlangan
                           </span>
                         )}
                       </div>

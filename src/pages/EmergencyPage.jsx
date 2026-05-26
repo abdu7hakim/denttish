@@ -15,7 +15,7 @@ export default function EmergencyPage() {
             <div>
               <h2 className="font-bold text-red-700 mb-1">Tish favqulodda holati</h2>
               <p className="text-sm text-red-600">
-                Xotirijam bo'ling. Kezkor yordamni tekzor yordamni bo'liming mutaxassislarimizbilan bog'lanib, bizning jutildi.
+                Xotirjam bo'ling. Tez yordam uchun mutaxassislarimiz bilan bog'lanib, bizning xizmatimizdan foydalaning.
               </p>
             </div>
           </div>
@@ -27,13 +27,13 @@ export default function EmergencyPage() {
           <div className="bg-white rounded-lg p-4 border-l-4 border-red-500">
             <div className="flex items-center gap-3 mb-2">
               <Phone size={24} className="text-red-500" />
-              <h3 className="font-bold">Stomatologga go'ng'iroq qilish</h3>
+              <h3 className="font-bold">Stomatologga qo'ng'iroq qilish</h3>
             </div>
             <p className="text-sm text-gray-600 mb-3">
-              Hozirning zidagi mutaxassislarimizbilan bog'lanib, bizning jutildi.
+               Hozirda mutaxassislarimiz bilan bog'lanib, bizning xizmatimizdan foydalaning.
             </p>
             <button className="w-full bg-red-500 text-white py-3 rounded-lg font-bold">
-              GO'NG'IROQ QILISH
+               QO'NG'IROQ QILISH
             </button>
           </div>
 
@@ -54,12 +54,12 @@ export default function EmergencyPage() {
 
         {/* Emergency Tips */}
         <div className="p-4">
-          <h2 className="text-lg font-bold mb-3">Tezkor yordamni Tezkor yordami belgilari</h2>
+          <h2 className="text-lg font-bold mb-3">Tez yordam ko'rsatmalari</h2>
           <div className="space-y-3">
             {[
-              { title: 'Tushib qolgan tish', desc: "Ma'lumot uchun og'riqni qo'shimcha ko'ring" },
-              { title: 'Kuchli tish', desc: "Hozirning zidagi mutaxassislarimizbilan bog'lanib, bizning jutildi" },
-              { title: 'Singan/shikastlangan tish', desc: "Og'zingizni suvga ushlagansalik tosh mushotlaringizni bezatilgan" },
+              { title: 'Tushib qolgan tish', desc: "Tishni sutga solib qo'ying va darhol shifokorga murojaat qiling" },
+              { title: 'Kuchli og\'riq', desc: "Tezda mutaxassislarimiz bilan bog'lanib, yordam oling" },
+              { title: 'Singan/shikastlangan tish', desc: "Og'zingizni iliq suv bilan chaying va shifokorga murojaat qiling" },
             ].map((item, idx) => (
               <div key={idx} className="bg-white rounded-lg p-4">
                 <div className="flex gap-3">
@@ -78,11 +78,11 @@ export default function EmergencyPage() {
         <div className="p-4">
           <h2 className="text-lg font-bold mb-3">Ilk yordam</h2>
           <div className="bg-white rounded-lg p-4 space-y-2">
-            <h3 className="font-bold text-sm mb-3">Tez zo'riqni Tezkor yordamni emas qo'llanilmani:</h3>
+            <h3 className="font-bold text-sm mb-3">Quyidagi amallarni bajaring:</h3>
             <ul className="space-y-2 text-sm text-gray-600">
-              <li>✓ Og'zingizni suvga shug'ullash va shampun yoki ruj bilan chini ema</li>
-              <li>✓ Xom og'riqni hal qilish uchun muzlatgan kompressni qo'llang</li>
-              <li>✓ Og'riqni sol shaharning noni bilan hal qilish uchun ibuprofen yoki paracetamol qabul qiling</li>
+              <li>✓ Og'zingizni iliq suv bilan chaying va yumshoq tish cho'tkasidan foydalaning</li>
+              <li>✓ Shish va og'riqni kamaytirish uchun muzlatilgan kompress qo'llang</li>
+              <li>✓ Og'riq qoldiruvchi vositalardan (ibuprofen yoki paracetamol) foydalaning</li>
             </ul>
           </div>
         </div>

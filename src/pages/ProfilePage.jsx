@@ -40,7 +40,7 @@ export default function ProfilePage() {
           </div>
           <div className="bg-white rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-primary">3</div>
-            <p className="text-xs text-gray-600">Daktarlar</p>
+            <p className="text-xs text-gray-600">Doktorlar</p>
           </div>
           <div className="bg-white rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-primary">2</div>

@@ -27,7 +27,7 @@ export default function DoctorPage() {
             className="w-20 h-20 rounded-full mx-auto mb-3"
           />
           <div className="flex justify-center gap-2 mb-2">
-            <span className="text-xs bg-blue-100 text-primary px-2 py-1 rounded">Tasdiqqlangan</span>
+            <span className="text-xs bg-blue-100 text-primary px-2 py-1 rounded">Tasdiqlangan</span>
           </div>
           <h1 className="text-2xl font-bold mb-1">Dr. Sarah Jenkins</h1>
           <p className="text-gray-600 mb-4">Kosmetik stomatologiya va Ortodontiya</p>

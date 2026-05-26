@@ -1,4 +1,4 @@
-import { Smile, FileText, Clock } from 'lucide-react'
+import { Smile, FileText, Clock, Activity } from 'lucide-react'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 
@@ -10,14 +10,14 @@ export default function HistoryPage() {
       <div className="pb-20">
         {/* Page Title */}
         <div className="bg-white p-4 border-b">
-          <h1 className="text-2xl font-bold">Sizning qaydalaringiz</h1>
-          <p className="text-gray-600 text-sm">Barcha tish davolash tarikh, rentgen nurlari va barqararligi bir joyda holatita</p>
+          <h1 className="text-2xl font-bold">Sizning tarixingiz</h1>
+          <p className="text-gray-600 text-sm">Barcha tish davolash tarixi, rentgen nurlari va natijalar bir joyda</p>
         </div>
 
         {/* Teeth Map */}
         <div className="p-4">
           <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-            <Tooth size={20} /> Tish xaritasi
+            <Activity size={20} /> Tish xaritasi
           </h2>
           <div className="bg-white rounded-lg p-4">
             <p className="text-sm text-gray-600 mb-4">Ma'lumot uchun og'riqni qo'shimcha ko'ring.</p>
@@ -72,17 +72,17 @@ export default function HistoryPage() {
               {
                 title: 'Kompleks ko\'rik',
                 date: '12-oktabr, 2023',
-                desc: "To'liq og'qa karies diagnostikasi va tish tozhilari ormonni oladi. Panoramik va bite-wing rentgenlarni olidi.",
+                desc: "To'liq og'iz karies diagnostikasi va tish tozalash amallari. Panoramik va bite-wing rentgenlar olindi.",
               },
               {
                 title: 'Tishlarni oqartirish',
                 date: '5-aprel, 2023',
-                desc: 'Klinik sharofidagi professional oqartirish murojayasi. 2 ton yorgiriqni shartidan oqartirdi.',
+                desc: 'Klinik sharoitida professional oqartirish muolajasi. 2 ton yorqinlikni oshirdi.',
               },
               {
                 title: 'Donolik tishini olish',
                 date: '20-noyabr, 2022',
-                desc: 'Pastki o\'ng jag\'dagi impaktangan donolik tishining jarrohlik olib tashlandi. Asoratzish bittik jarayonida.',
+                desc: 'Pastki o\'ng jag\'dagi impaktlangan donolik tishining jarrohlik yo\'li bilan olib tashlandi. Asoratsiz bitdi.',
               },
             ].map((item, idx) => (
               <div key={idx} className="bg-white rounded-lg p-4">

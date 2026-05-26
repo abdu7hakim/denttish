@@ -223,7 +223,7 @@ export default function BookingPage() {
               <label className="flex items-center gap-2">
                 <input type="checkbox" className="w-4 h-4" defaultChecked />
                 <span className="text-sm text-gray-600">
-                  Men shartlar va qoidalarni qabul qilamn
+                  Men shartlar va qoidalarni qabul qilaman
                 </span>
               </label>
               <label className="flex items-center gap-2">

@@ -8,7 +8,7 @@ export default function AIPage() {
     {
       id: 1,
       type: 'ai',
-      text: "Salom! Men sizning DentTish AI yordamchisiman. Bugun tabassumingizuchun qanday yordam bera olaman?",
+      text: "Salom! Men sizning DentTish AI yordamchisiman. Bugun tabassumingiz uchun qanday yordam bera olaman?",
       timestamp: 'Bugun',
       icon: '🏠',
     },
@@ -47,7 +47,7 @@ export default function AIPage() {
         <div className="bg-white p-4 text-center border-b">
           <p className="text-sm text-gray-600">Bugun</p>
           <h2 className="text-lg font-bold mt-2">
-            Salom! Men sizning DentTish AI yordamchisiman. Bugun tabassumingizuchun qanday yordam bera olaman?
+            Salom! Men sizning DentTish AI yordamchisiman. Bugun tabassumingiz uchun qanday yordam bera olaman?
           </h2>
         </div>
 
@@ -78,24 +78,24 @@ export default function AIPage() {
               <span>🔍</span> SIMPTOMLARNI TEKSHIRISH
             </h3>
             <p className="text-sm text-gray-600 mb-4">
-              O'qarning sovuq suv ichganda o'tkir og'riq bor. Buning sababi nima bo'lishi mumkin?
+               Bemorning sovuq suv ichganda o'tkir og'riq bor. Buning sababi nima bo'lishi mumkin?
             </p>
           </div>
 
           <div className="bg-white rounded-lg p-4">
-            <h3 className="font-bold mb-3 text-sm">Sizga yordamchi bo'lish uchun:</h3>
+            <h3 className="font-bold mb-3 text-sm">Sizga yordam berish uchun:</h3>
             <ul className="space-y-2 text-sm">
               <li className="flex items-start gap-2">
                 <input type="checkbox" className="mt-1" />
-                <span>Tishni xom bo'lsa, uni o'tkazib yuboring</span>
+                <span>Tishingiz og'risa, shifokorga murojaat qiling</span>
               </li>
               <li className="flex items-start gap-2">
                 <input type="checkbox" className="mt-1" />
-                <span>Og'riqning muddati va kuchini o'lchang</span>
+                <span>Og'riqning muddati va kuchini kuzating</span>
               </li>
               <li className="flex items-start gap-2">
                 <input type="checkbox" className="mt-1" />
-                <span>O'zingizni shifa olayotganingizni aytib o'ting</span>
+                <span>O'zingizni qanday his qilayotganingizni ayting</span>
               </li>
             </ul>
           </div>
@@ -103,13 +103,13 @@ export default function AIPage() {
           {/* Symptoms Info */}
           <div className="bg-white rounded-lg p-4">
             <h3 className="font-bold mb-3 flex items-center gap-2">
-              ⚠️ OGIRLIK BELGILARI
+              ⚠️ OG'IRLIK BELGILARI
             </h3>
             <p className="text-sm text-gray-600 font-semibold mb-2">Ushbu alomatlar bo'lsa darhol stomatologga murojaat qiling:</p>
             <ul className="space-y-1 text-sm text-gray-600">
-              <li>• Og'riq 30 kundan ko'proq davom etsa</li>
-              <li>• Og'riq og'ir bo'lsa, uni o'tkazib yubormang</li>
-              <li>• Shishli, it og'riq yoki kuyi bo'lsa</li>
+              <li>• Og'riq 2 kundan ko'proq davom etsa</li>
+              <li>• Kuchli og'riq bo'lsa, uni e'tiborsiz qoldirmang</li>
+              <li>• Shish, qattiq og'riq yoki qon ketish bo'lsa</li>
             </ul>
           </div>
         </div>
