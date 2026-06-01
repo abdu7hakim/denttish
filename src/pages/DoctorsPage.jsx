@@ -3,91 +3,37 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import { useAppContext } from '../context/AppContext'
 
 export default function DoctorsPage() {
   const navigate = useNavigate()
   const [favorites, setFavorites] = useState([])
+  const { doctors } = useAppContext()
 
-  const doctors = [
-    {
-      id: 1,
-      name: 'Dr. Sarah Jenkins',
-      specialty: 'Kosmetik stomatologiya va Ortodontiya',
-      clinic: 'DentTish Premium Clinic',
-      rating: 4.9,
-      reviews: 120,
-      experience: 12,
-      distance: 2.5,
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-      verified: true,
-    },
-    {
-      id: 2,
-      name: 'Dr. Marcus Vance',
-      specialty: 'Ortodontist',
-      clinic: 'Lumina Dental Hub',
-      rating: 4.8,
-      reviews: 95,
-      experience: 8,
-      distance: 1.2,
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus',
-      verified: true,
-    },
-    {
-      id: 3,
-      name: 'Dr. Elena Rostova',
-      specialty: 'Katta endodontist',
-      clinic: 'SmileCare Dental Studio',
-      rating: 4.7,
-      reviews: 78,
-      experience: 15,
-      distance: 3.1,
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Elena',
-      verified: true,
-    },
-    {
-      id: 4,
-      name: 'Dr. Ahmed Hassan',
-      specialty: 'Implant va Protez',
-      clinic: 'Bright Smile Clinic',
-      rating: 4.6,
-      reviews: 65,
-      experience: 10,
-      distance: 4.2,
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed',
-      verified: false,
-    },
-    {
-      id: 5,
-      name: 'Dr. Anna Kowalski',
-      specialty: 'Pediatrik Stomatolog',
-      clinic: 'Lumina Dental Hub',
-      rating: 4.9,
-      reviews: 140,
-      experience: 9,
-      distance: 1.2,
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Anna',
-      verified: true,
-    },
-    {
-      id: 6,
-      name: 'Dr. Juan Carlos',
-      specialty: 'Estetik va Umumiy',
-      clinic: 'DentTish Premium Clinic',
-      rating: 4.8,
-      reviews: 102,
-      experience: 11,
-      distance: 2.5,
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Juan',
-      verified: true,
-    },
-  ]
+  // Map admin doctors to display format
+  const displayDoctors = doctors.map(doctor => ({
+    id: doctor.id,
+    name: doctor.name,
+    specialty: doctor.specialization + (doctor.subspecialty ? ` - ${doctor.subspecialty}` : ''),
+    clinic: 'DentTish Klinika',
+    rating: 4.8,
+    reviews: parseInt(doctor.patients.replace(/\D/g, '')) || 100,
+    experience: parseInt(doctor.experience),
+    distance: 2.5,
+    image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${doctor.name}`,
+    verified: doctor.status === 'FAOL',
+    phone: doctor.phone,
+    status: doctor.status,
+  }))
 
   const toggleFavorite = (id) => {
     setFavorites((prev) =>
       prev.includes(id) ? prev.filter((fav) => fav !== id) : [...prev, id]
     )
   }
+
+  // Old dummy data - removed and replaced with AppContext data
+  // (This data is not used anymore, displayDoctors is used instead)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -102,12 +48,12 @@ export default function DoctorsPage() {
             </button>
             <h1 className="text-2xl font-bold flex-1">Shifokorlar</h1>
           </div>
-          <p className="text-gray-600 text-sm">{doctors.length} ta shifokor</p>
+          <p className="text-gray-600 text-sm">{displayDoctors.length} ta shifokor</p>
         </div>
 
         {/* Doctors List */}
         <div className="p-4 space-y-3">
-          {doctors.map((doctor) => (
+          {displayDoctors.map((doctor) => (
             <div key={doctor.id} className="bg-white rounded-lg p-4 hover:shadow-md transition">
               <div className="flex gap-3">
                 <img
@@ -122,7 +68,7 @@ export default function DoctorsPage() {
                         <h3 className="font-bold">{doctor.name}</h3>
                         {doctor.verified && (
                           <span className="text-xs bg-blue-100 text-primary px-2 py-0.5 rounded">
-                            ✓ Tasdiqlangan
+                            ✓ Faol
                           </span>
                         )}
                       </div>

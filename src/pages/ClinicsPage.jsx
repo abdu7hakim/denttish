@@ -3,61 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import { useAppContext } from '../context/AppContext'
 
 export default function ClinicsPage() {
   const navigate = useNavigate()
   const [filter, setFilter] = useState('all')
-
-  const clinics = [
-    {
-      id: 1,
-      name: 'Lumina Dental Hub',
-      rating: 4.8,
-      reviews: 245,
-      distance: 1.2,
-      address: 'Amir Temur ko\'chasi 45-uy, Tashkent',
-      phone: '+998 71 123 45 67',
-      hours: '09:00 - 21:00',
-      services: ['UMUMIY', 'RENTGEN', 'IMPLANT'],
-      image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic1',
-    },
-    {
-      id: 2,
-      name: 'DentTish Premium Clinic',
-      rating: 4.9,
-      reviews: 312,
-      distance: 2.5,
-      address: 'Navoi ko\'chasi 12-uy, Tashkent',
-      phone: '+998 71 234 56 78',
-      hours: '08:00 - 22:00',
-      services: ['UMUMIY', 'ORTODONTIYA', 'KOSMETIK'],
-      image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic2',
-    },
-    {
-      id: 3,
-      name: 'SmileCare Dental Studio',
-      rating: 4.7,
-      reviews: 189,
-      distance: 3.1,
-      address: 'Buyuk Ipak yo\'li 56-uy, Tashkent',
-      phone: '+998 71 345 67 89',
-      hours: '10:00 - 20:00',
-      services: ['UMUMIY', 'PROTEZ', 'ENDODONTIYA'],
-      image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic3',
-    },
-    {
-      id: 4,
-      name: 'Bright Smile Clinic',
-      rating: 4.6,
-      reviews: 156,
-      distance: 4.2,
-      address: 'Mirabad tumani, Qo\'qon ko\'chasi 89-uy',
-      phone: '+998 71 456 78 90',
-      hours: '09:00 - 19:00',
-      services: ['UMUMIY', 'RENTGEN'],
-      image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic4',
-    },
-  ]
+  const { clinics } = useAppContext()
 
   return (
     <div className="min-h-screen bg-gray-50">

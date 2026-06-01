@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { AppProvider } from './context/AppContext'
 import HomePage from './pages/HomePage'
 import DoctorPage from './pages/DoctorPage'
 import AIPage from './pages/AIPage'
@@ -11,25 +12,39 @@ import DoctorsPage from './pages/DoctorsPage'
 import BookingPage from './pages/BookingPage'
 import NotificationsPage from './pages/NotificationsPage'
 import SettingsPage from './pages/SettingsPage'
+import AdminLogin from './admin/pages/AdminLogin'
+import AdminDashboard from './admin/pages/AdminDashboard'
+import DoctorsManagement from './admin/pages/DoctorsManagement'
+import AppointmentsManagement from './admin/pages/AppointmentsManagement'
+import AdminSettings from './admin/pages/AdminSettings'
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/doctor/:id" element={<DoctorPage />} />
-        <Route path="/ai" element={<AIPage />} />
-        <Route path="/emergency" element={<EmergencyPage />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="/accepted" element={<AcceptedPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/clinics" element={<ClinicsPage />} />
-        <Route path="/doctors" element={<DoctorsPage />} />
-        <Route path="/booking/:doctorId" element={<BookingPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-      </Routes>
-    </Router>
+    <AppProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/doctor/:id" element={<DoctorPage />} />
+          <Route path="/ai" element={<AIPage />} />
+          <Route path="/emergency" element={<EmergencyPage />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/accepted" element={<AcceptedPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/clinics" element={<ClinicsPage />} />
+          <Route path="/doctors" element={<DoctorsPage />} />
+          <Route path="/booking/:doctorId" element={<BookingPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/doctors" element={<DoctorsManagement />} />
+          <Route path="/admin/appointments" element={<AppointmentsManagement />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
+        </Routes>
+      </Router>
+    </AppProvider>
   )
 }
 

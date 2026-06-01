@@ -1,0 +1,305 @@
+import React, { useState } from 'react';
+import AdminLayout from '../components/AdminLayout';
+import { useAppContext } from '../../context/AppContext';
+import {
+  Calendar,
+  Search,
+  Filter,
+  Download,
+  Edit,
+  Trash2,
+  Plus,
+  CheckCircle,
+  Clock,
+  X,
+  AlertCircle,
+} from 'lucide-react';
+
+export default function AppointmentsManagement() {
+  const { doctors, clinics, appointments, addAppointment, updateAppointment, deleteAppointment } = useAppContext();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState({
+    patient: '',
+    doctor: '',
+    clinic: '',
+    date: '',
+    time: '',
+    status: 'Kutilmoqda',
+  });
+
+  const statusColors = {
+    'Tasdiqlangan': 'bg-green-100 text-green-800',
+    'Kutilmoqda': 'bg-yellow-100 text-yellow-800',
+    'Yakunlandi': 'bg-blue-100 text-blue-800',
+    'Bekor qilindi': 'bg-red-100 text-red-800',
+  };
+
+  const statusIcons = {
+    'Tasdiqlangan': CheckCircle,
+    'Kutilmoqda': Clock,
+    'Yakunlandi': CheckCircle,
+    'Bekor qilindi': X,
+  };
+
+  const getInitials = (name) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const filteredAppointments = appointments.filter((apt) => {
+    const matchesSearch =
+      apt.patient.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      apt.doctor.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      statusFilter === 'all' || apt.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleOpenModal = (appointment = null) => {
+    if (appointment) {
+      setEditingId(appointment.id);
+      setFormData({
+        patient: appointment.patient,
+        doctor: appointment.doctor,
+        clinic: appointment.clinic,
+        date: appointment.date,
+        time: appointment.time,
+        status: appointment.status,
+      });
+    } else {
+      setEditingId(null);
+      setFormData({
+        patient: '',
+        doctor: '',
+        clinic: '',
+        date: '',
+        time: '',
+        status: 'Kutilmoqda',
+      });
+    }
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingId(null);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.patient || !formData.doctor || !formData.clinic || !formData.date || !formData.time) {
+      alert('Barcha maydonlarni to\'ldiring');
+      return;
+    }
+
+    if (editingId) {
+      updateAppointment(editingId, formData);
+    } else {
+      addAppointment(formData);
+    }
+    handleCloseModal();
+  };
+
+  const handleDelete = (id) => {
+    if (confirm('Haqiqatan ham bu qabulni o\'chirib tashlamoqchisiz?')) {
+      deleteAppointment(id);
+    }
+  };
+
+  return (
+    <AdminLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Qabullar</h1>
+            <p className="text-gray-600 mt-1">
+              Barcha uchrashuvlarni boshqarish va kuzatish
+            </p>
+          </div>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors">
+            <Plus size={20} />
+            Yangi qabul qo'shish
+          </button>
+        </div>
+
+        {/* Filters */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Search */}
+            <div className="relative">
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={20}
+              />
+              <input
+                type="text"
+                placeholder="Bemor yoki shifokor"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Specialty filter */}
+            <div>
+              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option>Barcha shifokorlar</option>
+                <option>Dr. Alisher Vohidov</option>
+                <option>Dr. Malika Karimova</option>
+                <option>Dr. Sardar Akhmedov</option>
+              </select>
+            </div>
+
+            {/* Status filter */}
+            <div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Barcha holatlari</option>
+                <option value="Tasdiqlangan">Tasdiqlangan</option>
+                <option value="Kutilmoqda">Kutilmoqda</option>
+                <option value="Yakunlandi">Yakunlandi</option>
+                <option value="Bekor qilindi">Bekor qilindi</option>
+              </select>
+            </div>
+
+            {/* Date filter */}
+            <div>
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Download button */}
+        <div className="flex justify-end">
+          <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
+            <Download size={20} />
+            Excelga yuklash
+          </button>
+        </div>
+
+        {/* Appointments Table */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase">
+                    Bemor
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase">
+                    Shifokor
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase">
+                    Filial
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase">
+                    Sana va Vaqt
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase">
+                    Holat
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase">
+                    Amallar
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredAppointments.map((appointment) => {
+                  const StatusIcon = appointment.statusIcon;
+                  return (
+                    <tr
+                      key={appointment.id}
+                      className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            {appointment.initials}
+                          </div>
+                          <span className="font-medium text-gray-900">
+                            {appointment.patient}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-700">
+                        {appointment.doctor}
+                      </td>
+                      <td className="px-6 py-4 text-gray-700">
+                        {appointment.clinic}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2 text-gray-900">
+                          <Calendar size={16} className="text-gray-500" />
+                          <span>
+                            {appointment.date}
+                            <br />
+                            <span className="text-sm text-gray-500">
+                              {appointment.time}
+                            </span>
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <StatusIcon size={16} />
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${appointment.statusColor}`}
+                          >
+                            {appointment.status}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-blue-600">
+                            <Edit size={18} />
+                          </button>
+                          <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-red-600">
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <span className="text-sm text-gray-600">
+              Jami: {filteredAppointments.length} ta uchrashuvlar
+            </span>
+            <div className="flex items-center gap-2">
+              <button className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50">
+                ←
+              </button>
+              <button className="px-3 py-1 bg-blue-600 text-white rounded-lg">
+                1
+              </button>
+              <button className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50">
+                2
+              </button>
+              <button className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50">
+                →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </AdminLayout>
+  );
+}
