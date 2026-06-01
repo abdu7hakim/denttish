@@ -43,20 +43,20 @@ export default function AdminLogin() {
         {/* Left side - Branding */}
         <div className="hidden md:flex flex-col justify-center items-center">
           <div className="text-center">
-            <div className="mb-6">
+            <div className="mb-8">
               <img
-                src="/src/images/logo.png"
-                alt="DentTish"
-                className="w-24 h-24 mx-auto opacity-90"
+                src="/logo.png"
+                alt="Logo"
+                className="w-50 h-28 mx-auto rounded-2xl "
               />
             </div>
             <h1 className="text-4xl font-bold text-blue-800 mb-3">
-              Zamonviy<br />
+              Zamonaviy<br />
               boshqaruv
             </h1>
             <p className="text-blue-600 text-lg leading-relaxed">
-              DentTish platformasi orqali bemorlar hisoblari,<br />
-              uchrashuvlar jadavallari va klinika moliyasini bitta<br />
+              Platforma orqali bemorlar hisobi,<br />
+              uchrashuvlar jadvali va klinika moliyasini<br />
               qulay tizimda boshqaring.
             </p>
           </div>
