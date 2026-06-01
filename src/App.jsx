@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AppProvider } from './context/AppContext'
+import ProtectedRoute from './admin/utils/auth'
 import HomePage from './pages/HomePage'
 import DoctorPage from './pages/DoctorPage'
 import AIPage from './pages/AIPage'
@@ -38,10 +39,10 @@ function App() {
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/doctors" element={<DoctorsManagement />} />
-          <Route path="/admin/appointments" element={<AppointmentsManagement />} />
-          <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/doctors" element={<ProtectedRoute><DoctorsManagement /></ProtectedRoute>} />
+          <Route path="/admin/appointments" element={<ProtectedRoute><AppointmentsManagement /></ProtectedRoute>} />
+          <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
         </Routes>
       </Router>
     </AppProvider>

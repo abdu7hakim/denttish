@@ -1,39 +1,21 @@
 import { ArrowLeft, Star, MapPin, Heart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { useAppContext } from '../context/AppContext'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
-import { useAppContext } from '../context/AppContext'
 
 export default function DoctorsPage() {
   const navigate = useNavigate()
-  const [favorites, setFavorites] = useState([])
   const { doctors } = useAppContext()
-
-  // Map admin doctors to display format
-  const displayDoctors = doctors.map(doctor => ({
-    id: doctor.id,
-    name: doctor.name,
-    specialty: doctor.specialization + (doctor.subspecialty ? ` - ${doctor.subspecialty}` : ''),
-    clinic: 'DentTish Klinika',
-    rating: 4.8,
-    reviews: parseInt(doctor.patients.replace(/\D/g, '')) || 100,
-    experience: parseInt(doctor.experience),
-    distance: 2.5,
-    image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${doctor.name}`,
-    verified: doctor.status === 'FAOL',
-    phone: doctor.phone,
-    status: doctor.status,
-  }))
+  const [favorites, setFavorites] = useState([])
+  const activeDoctors = doctors.filter(d => d.status === 'FAOL')
 
   const toggleFavorite = (id) => {
     setFavorites((prev) =>
       prev.includes(id) ? prev.filter((fav) => fav !== id) : [...prev, id]
     )
   }
-
-  // Old dummy data - removed and replaced with AppContext data
-  // (This data is not used anymore, displayDoctors is used instead)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -48,12 +30,12 @@ export default function DoctorsPage() {
             </button>
             <h1 className="text-2xl font-bold flex-1">Shifokorlar</h1>
           </div>
-          <p className="text-gray-600 text-sm">{displayDoctors.length} ta shifokor</p>
+          <p className="text-gray-600 text-sm">{activeDoctors.length} ta shifokor</p>
         </div>
 
         {/* Doctors List */}
         <div className="p-4 space-y-3">
-          {displayDoctors.map((doctor) => (
+          {activeDoctors.map((doctor) => (
             <div key={doctor.id} className="bg-white rounded-lg p-4 hover:shadow-md transition">
               <div className="flex gap-3">
                 <img
@@ -68,11 +50,11 @@ export default function DoctorsPage() {
                         <h3 className="font-bold">{doctor.name}</h3>
                         {doctor.verified && (
                           <span className="text-xs bg-blue-100 text-primary px-2 py-0.5 rounded">
-                            ✓ Faol
+                            ✓ Tasdiqlangan
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-gray-600">{doctor.specialty}</p>
+                      <p className="text-xs text-gray-600">{doctor.specialization}</p>
                     </div>
                     <button
                       onClick={() => toggleFavorite(doctor.id)}
@@ -101,7 +83,7 @@ export default function DoctorsPage() {
                       <span className="font-semibold">{doctor.rating}</span>
                       <span className="text-gray-600">({doctor.reviews})</span>
                     </div>
-                    <span className="text-gray-600">• {doctor.experience} yil</span>
+                    <span className="text-gray-600">• {doctor.experience}</span>
                     <span className="text-gray-600">• {doctor.distance} km</span>
                   </div>
 

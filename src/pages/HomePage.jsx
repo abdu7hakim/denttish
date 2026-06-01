@@ -1,10 +1,14 @@
 import { Search, Home, Clock, Box, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useAppContext } from '../context/AppContext'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 
 export default function HomePage() {
   const navigate = useNavigate()
+  const { doctors, clinics, appointments } = useAppContext()
+  const upcomingAppointment = appointments.find(a => a.status === 'Tasdiqlangan' || a.status === 'Kutilmoqda')
+  const activeDoctors = doctors.filter(d => d.status === 'FAOL')
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -13,7 +17,7 @@ export default function HomePage() {
       <div className="pb-20">
         {/* Greeting Section */}
         <div className="p-4">
-          <h1 className="text-2xl font-bold mb-2">Xayrli tong, Sarah</h1>
+          <h1 className="text-2xl font-bold mb-2">Xayrli tong, Abdulloh</h1>
           <p className="text-gray-600">Tishlaringiz sog'lig'i haqida qayg'urish vaqti keldi.</p>
         </div>
 
@@ -35,31 +39,33 @@ export default function HomePage() {
         </div>
 
         {/* Upcoming Appointment */}
-        <div className="px-4 py-4">
-          <h2 className="text-lg font-bold mb-3">Kelasi qabul</h2>
-          <div className="bg-blue-100 rounded-2xl p-4">
-            <div className="flex gap-3">
-              <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
-                alt="Doctor"
-                className="w-12 h-12 rounded-full"
-              />
-              <div className="flex-1">
-                <h3 className="font-bold">Dr. Emily Chen</h3>
-                <p className="text-sm text-gray-600">SmileCare klinikasi</p>
-                <div className="flex gap-4 mt-2 text-sm">
-                  <span className="bg-white px-2 py-1 rounded">BUGUN 14:30</span>
+        {upcomingAppointment && (
+          <div className="px-4 py-4">
+            <h2 className="text-lg font-bold mb-3">Kelasi qabul</h2>
+            <div className="bg-blue-100 rounded-2xl p-4">
+              <div className="flex gap-3">
+                <img
+                  src={doctors.find(d => d.name === upcomingAppointment.doctor)?.image || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Doctor'}
+                  alt="Doctor"
+                  className="w-12 h-12 rounded-full"
+                />
+                <div className="flex-1">
+                  <h3 className="font-bold">{upcomingAppointment.doctor}</h3>
+                  <p className="text-sm text-gray-600">{upcomingAppointment.clinic}</p>
+                  <div className="flex gap-4 mt-2 text-sm">
+                    <span className="bg-white px-2 py-1 rounded">{upcomingAppointment.date} {upcomingAppointment.time}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Categories */}
         <div className="px-4 py-4">
           <h2 className="text-lg font-bold mb-3">Kategoriyalar</h2>
           <div className="flex gap-2 overflow-x-auto pb-2">
-            {['Hammasi', 'Umumiy', 'Ortodontist'].map((category) => (
+            {['Hammasi', 'Umumiy', 'Ortodontist', 'Kosmetik', 'Implant'].map((category) => (
               <button
                 key={category}
                 className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm font-semibold whitespace-nowrap"
@@ -77,12 +83,10 @@ export default function HomePage() {
             <button onClick={() => navigate('/clinics')} className="text-primary text-sm font-semibold">Barchasi</button>
           </div>
           <div className="space-y-3">
-            {[
-              { name: 'Lumina Dental Hub', rating: 4.8, distance: 1.2, km: true },
-            ].map((clinic) => (
-              <div key={clinic.name} className="bg-white rounded-lg p-4 flex gap-3 cursor-pointer hover:shadow-md">
+            {clinics.slice(0, 3).map((clinic) => (
+              <div key={clinic.id} className="bg-white rounded-lg p-4 flex gap-3 cursor-pointer hover:shadow-md">
                 <img
-                  src="https://api.dicebear.com/7.x/shapes/svg?seed=clinic"
+                  src={clinic.image}
                   alt={clinic.name}
                   className="w-16 h-16 rounded-lg"
                 />
@@ -94,8 +98,9 @@ export default function HomePage() {
                     <span className="text-gray-500">• {clinic.distance} km</span>
                   </div>
                   <div className="flex gap-2">
-                    <span className="text-xs bg-blue-100 text-primary px-2 py-1 rounded">UMUMIY</span>
-                    <span className="text-xs bg-blue-100 text-primary px-2 py-1 rounded">RENTGEN</span>
+                    {clinic.services.slice(0, 2).map((s) => (
+                      <span key={s} className="text-xs bg-blue-100 text-primary px-2 py-1 rounded">{s}</span>
+                    ))}
                   </div>
                 </div>
                 <span className="text-primary text-xl">→</span>
@@ -111,24 +116,22 @@ export default function HomePage() {
             <button onClick={() => navigate('/doctors')} className="text-primary text-sm font-semibold">Barchasi</button>
           </div>
           <div className="space-y-3">
-            {[
-              { name: 'Dr. Marcus Vance', specialty: 'Ortodontist', action: 'Band qilish' },
-            ].map((doctor) => (
+            {activeDoctors.slice(0, 3).map((doctor) => (
               <div
-                key={doctor.name}
+                key={doctor.id}
                 className="bg-white rounded-lg p-4 flex gap-3 cursor-pointer hover:shadow-md"
-                onClick={() => navigate('/doctor/1')}
+                onClick={() => navigate(`/doctor/${doctor.id}`)}
               >
                 <img
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus"
+                  src={doctor.image}
                   alt={doctor.name}
                   className="w-12 h-12 rounded-full"
                 />
                 <div className="flex-1">
                   <h3 className="font-bold">{doctor.name}</h3>
-                  <p className="text-sm text-gray-600">{doctor.specialty}</p>
+                  <p className="text-sm text-gray-600">{doctor.specialization}</p>
                 </div>
-                <button className="text-gray-400 text-xs">{doctor.action}</button>
+                <button className="text-gray-400 text-xs">Band qilish</button>
               </div>
             ))}
           </div>

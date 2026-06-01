@@ -1,10 +1,23 @@
 import { ArrowLeft, MapPin, Heart, Share2, Calendar, Star } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useAppContext } from '../context/AppContext'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 
 export default function DoctorPage() {
   const navigate = useNavigate()
+  const { id } = useParams()
+  const { doctors, clinics } = useAppContext()
+  const doctor = doctors.find(d => d.id === parseInt(id))
+  const doctorClinic = clinics.find(c => c.name === doctor?.clinic)
+
+  if (!doctor) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600">Shifokor topilmadi</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -22,31 +35,33 @@ export default function DoctorPage() {
         {/* Doctor Info */}
         <div className="bg-white p-6 text-center">
           <img
-            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
-            alt="Doctor"
+            src={doctor.image}
+            alt={doctor.name}
             className="w-20 h-20 rounded-full mx-auto mb-3"
           />
           <div className="flex justify-center gap-2 mb-2">
-            <span className="text-xs bg-blue-100 text-primary px-2 py-1 rounded">Tasdiqlangan</span>
+            {doctor.verified && (
+              <span className="text-xs bg-blue-100 text-primary px-2 py-1 rounded">Tasdiqlangan</span>
+            )}
           </div>
-          <h1 className="text-2xl font-bold mb-1">Dr. Sarah Jenkins</h1>
-          <p className="text-gray-600 mb-4">Kosmetik stomatologiya va Ortodontiya</p>
+          <h1 className="text-2xl font-bold mb-1">{doctor.name}</h1>
+          <p className="text-gray-600 mb-4">{doctor.specialization}</p>
 
           {/* Stats */}
           <div className="flex justify-around py-4 border-y border-gray-200 mb-4">
             <div>
               <div className="flex items-center justify-center gap-1">
                 <Star size={16} className="text-yellow-400" />
-                <span className="font-bold">4.9</span>
+                <span className="font-bold">{doctor.rating}</span>
               </div>
-              <p className="text-xs text-gray-600">120+ sharhlar</p>
+              <p className="text-xs text-gray-600">{doctor.reviews}+ sharhlar</p>
             </div>
             <div>
-              <span className="font-bold text-lg">12</span>
+              <span className="font-bold text-lg">{doctor.experience.replace(' yil', '')}</span>
               <p className="text-xs text-gray-600">Yil tajribasi</p>
             </div>
             <div>
-              <span className="font-bold text-lg">2000+</span>
+              <span className="font-bold text-lg">{doctor.patients}</span>
               <p className="text-xs text-gray-600">Bemorlar</p>
             </div>
           </div>
@@ -71,7 +86,7 @@ export default function DoctorPage() {
               <span>ℹ️</span> Shifokor haqida
             </h3>
             <p className="text-sm text-gray-600">
-              Dr. Sarah Jenkins — kosmetik stomatologiya va ortodontiya bo'yicha mutaxassis. U zamonaviy texnologiyalar bilan 12 yillik tajribaga ega.
+              {doctor.name} — {doctor.specialization} bo'yicha mutaxassis. {doctor.experience} tajribaga ega. {doctor.patients} dan ortiq bemorlarga xizmat ko'rsatgan.
             </p>
           </div>
 
@@ -79,14 +94,14 @@ export default function DoctorPage() {
             <h3 className="font-bold mb-2 flex items-center gap-2">
               <MapPin size={20} /> Manzili va klinika
             </h3>
-            <p className="text-sm font-semibold mb-1">DentTish Premium Clinic</p>
-            <p className="text-sm text-gray-600">Tashkent, Amir Temur ko'chasi 45-uy</p>
+            <p className="text-sm font-semibold mb-1">{doctor.clinic}</p>
+            <p className="text-sm text-gray-600">{doctorClinic?.address || doctorClinic?.name || 'Tashkent'}</p>
           </div>
 
           {/* Gallery */}
           <div className="bg-white rounded-lg p-4">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-bold">Tabassumi galereya</h3>
+              <h3 className="font-bold">Tabassum galereyasi</h3>
               <a href="#" className="text-primary text-sm">Barchasi</a>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -129,7 +144,7 @@ export default function DoctorPage() {
                 ))}
               </div>
             </div>
-            <button onClick={() => navigate('/booking/1')} className="w-full bg-primary text-white py-3 rounded-lg font-bold mt-4">
+            <button onClick={() => navigate(`/booking/${doctor.id}`)} className="w-full bg-primary text-white py-3 rounded-lg font-bold mt-4">
               Qabul yozilish →
             </button>
           </div>

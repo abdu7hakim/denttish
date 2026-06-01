@@ -1,14 +1,14 @@
 import { ArrowLeft, MapPin, Phone, Clock, Star, Filter } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { useAppContext } from '../context/AppContext'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
-import { useAppContext } from '../context/AppContext'
 
 export default function ClinicsPage() {
   const navigate = useNavigate()
-  const [filter, setFilter] = useState('all')
   const { clinics } = useAppContext()
+  const [filter, setFilter] = useState('all')
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -89,7 +89,7 @@ export default function ClinicsPage() {
                   ))}
                 </div>
 
-                <button onClick={() => navigate('/booking/1')} className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-blue-700">
+                <button onClick={() => navigate(`/booking/1`)} className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-blue-700">
                   BAND QILISH →
                 </button>
               </div>

@@ -1,27 +1,24 @@
 import { ArrowLeft, Calendar, Clock, MapPin, User } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useState } from 'react'
+import { useAppContext } from '../context/AppContext'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 
 export default function BookingPage() {
   const navigate = useNavigate()
+  const { doctorId } = useParams()
+  const { doctors, addAppointment } = useAppContext()
+  const doctor = doctors.find(d => d.id === parseInt(doctorId)) || doctors[0]
   const [step, setStep] = useState(1)
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedTime, setSelectedTime] = useState(null)
   const [selectedService, setSelectedService] = useState(null)
 
-  const doctor = {
-    name: 'Dr. Sarah Jenkins',
-    specialty: 'Kosmetik stomatologiya',
-    clinic: 'DentTish Premium Clinic',
-    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-  }
-
   const services = [
     { id: 1, name: 'Tish tahlili', duration: '30 min', price: '50,000' },
     { id: 2, name: 'Tish tozalash', duration: '45 min', price: '150,000' },
-    { id: 3, name: 'Tish tozhish', duration: '60 min', price: '300,000' },
+    { id: 3, name: 'Tish plombalash', duration: '60 min', price: '300,000' },
     { id: 4, name: 'Tish oqartirish', duration: '90 min', price: '500,000' },
   ]
 
@@ -35,9 +32,23 @@ export default function BookingPage() {
 
   const canContinue = () => {
     if (step === 1) return selectedService
-    if (step === 2) return selectedDate
+    if (step === 2) return selectedDate !== null
     if (step === 3) return selectedTime
     return true
+  }
+
+  const handleConfirm = () => {
+    const service = services.find(s => s.id === selectedService)
+    addAppointment({
+      patient: 'Abdulloh',
+      doctor: doctor.name,
+      doctorId: doctor.id,
+      clinic: doctor.clinic || 'DentTish Klinika',
+      date: dates[selectedDate]?.toLocaleDateString('uz-UZ', { weekday: 'long', month: 'long', day: 'numeric' }) || '',
+      time: selectedTime,
+      status: 'Tasdiqlangan',
+    })
+    navigate('/accepted')
   }
 
   return (
@@ -77,7 +88,7 @@ export default function BookingPage() {
             />
             <div>
               <h3 className="font-bold text-sm">{doctor.name}</h3>
-              <p className="text-xs text-gray-600">{doctor.specialty}</p>
+              <p className="text-xs text-gray-600">{doctor.specialization}</p>
               <p className="text-xs text-gray-500">{doctor.clinic}</p>
             </div>
           </div>
@@ -260,7 +271,7 @@ export default function BookingPage() {
             </button>
           ) : (
             <button
-              onClick={() => navigate('/accepted')}
+              onClick={handleConfirm}
               className="flex-1 bg-primary text-white py-3 rounded-lg font-bold"
             >
               Band qilishni tasdiqlash

@@ -1,9 +1,13 @@
 import { CheckCircle, Calendar, Clock, MapPin, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useAppContext } from '../context/AppContext'
 import Header from '../components/Header'
 
 export default function AcceptedPage() {
   const navigate = useNavigate()
+  const { lastBooking, doctors } = useAppContext()
+  const booking = lastBooking
+  const doctor = doctors.find(d => d.id === (booking?.doctorId || 1))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -28,13 +32,13 @@ export default function AcceptedPage() {
           {/* Doctor */}
           <div className="flex gap-3 pb-4 border-b">
             <img
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Elena"
+              src={doctor?.image || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Doctor'}
               alt="Doctor"
               className="w-14 h-14 rounded-full"
             />
             <div>
-              <p className="font-bold">Dr. Elena Rostova</p>
-              <p className="text-sm text-gray-600">Katta endodontist</p>
+              <p className="font-bold">{booking?.doctor || 'Dr. Sarah Jenkins'}</p>
+              <p className="text-sm text-gray-600">{doctor?.specialization || 'Stomatolog'}</p>
             </div>
           </div>
 
@@ -44,7 +48,7 @@ export default function AcceptedPage() {
               <Calendar className="text-primary" size={20} />
               <div>
                 <p className="text-sm text-gray-600">Sana</p>
-                <p className="font-bold">24-oktabr, 2023</p>
+                <p className="font-bold">{booking?.date || '24-oktabr, 2023'}</p>
               </div>
             </div>
 
@@ -52,7 +56,7 @@ export default function AcceptedPage() {
               <Clock className="text-primary" size={20} />
               <div>
                 <p className="text-sm text-gray-600">Vaqt</p>
-                <p className="font-bold">10:00</p>
+                <p className="font-bold">{booking?.time || '10:00'}</p>
               </div>
             </div>
 
@@ -60,8 +64,8 @@ export default function AcceptedPage() {
               <MapPin className="text-primary" size={20} />
               <div>
                 <p className="text-sm text-gray-600">Joylashuv</p>
-                <p className="font-bold">Lumina Dental Studio</p>
-                <p className="text-sm text-gray-600">Foshkent sh., Amir Temur ko'chasi 45-uy</p>
+                <p className="font-bold">{booking?.clinic || 'DentTish Klinika'}</p>
+                <p className="text-sm text-gray-600">Tashkent shahri</p>
               </div>
             </div>
           </div>

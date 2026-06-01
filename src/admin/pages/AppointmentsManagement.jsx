@@ -12,7 +12,6 @@ import {
   CheckCircle,
   Clock,
   X,
-  AlertCircle,
 } from 'lucide-react';
 
 export default function AppointmentsManagement() {
@@ -97,17 +96,11 @@ export default function AppointmentsManagement() {
 
     // Extract clinic name (remove " Filiali" if present)
     const clinicName = formData.clinic.replace(' Filiali', '');
-    
-    // Extract doctor name (remove duplicate "Dr. Dr." if present)
-    let doctorName = formData.doctor;
-    if (doctorName.startsWith('Dr. Dr.')) {
-      doctorName = doctorName.replace('Dr. Dr.', 'Dr.');
-    }
 
     const appointmentData = {
       patient: formData.patient,
       initials: formData.patient.split(' ').map(n => n[0]).join('').toUpperCase(),
-      doctor: doctorName,
+      doctor: formData.doctor,
       clinic: clinicName,
       date: formData.date,
       time: formData.time,
@@ -363,8 +356,8 @@ export default function AppointmentsManagement() {
                     >
                       <option value="">Shifokorni tanlang</option>
                       {doctors.map(doc => (
-                        <option key={doc.id} value={`Dr. ${doc.name}`}>
-                          Dr. {doc.name}
+                        <option key={doc.id} value={doc.name}>
+                          {doc.name}
                         </option>
                       ))}
                     </select>

@@ -1,27 +1,18 @@
 import React, { useState } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import { Save, Bell, Lock, Users, Globe } from 'lucide-react';
+import { useAppContext } from '../../context/AppContext';
 
 export default function AdminSettings() {
-  const [settings, setSettings] = useState({
-    clinicName: 'DentTish Klinika',
-    email: 'admin@denttish.uz',
-    phone: '+998 71 200 00 00',
-    address: 'Tashkent, Yunusobod tumani',
-    workingHoursStart: '09:00',
-    workingHoursEnd: '18:00',
-    notificationsEmail: true,
-    notificationsSms: true,
-    notificationsPush: true,
-    twoFactorAuth: false,
-  });
+  const { clinicSettings, updateClinicSettings } = useAppContext();
+  const [settings, setSettings] = useState(clinicSettings);
 
   const handleChange = (field, value) => {
     setSettings({ ...settings, [field]: value });
   };
 
   const handleSave = () => {
-    // Placeholder for saving settings
+    updateClinicSettings(settings);
     alert('Sozlamalar saqlandi!');
   };
 
@@ -134,7 +125,7 @@ export default function AdminSettings() {
               <div>
                 <p className="font-medium text-gray-900">Email orqali</p>
                 <p className="text-sm text-gray-600">
-                  Muhim xabarlari email orqali qabul qiling
+                  Muhim xabarlarni email orqali qabul qiling
                 </p>
               </div>
               <input
@@ -151,7 +142,7 @@ export default function AdminSettings() {
               <div>
                 <p className="font-medium text-gray-900">SMS orqali</p>
                 <p className="text-sm text-gray-600">
-                  Tezkor xabarlari SMS orqali qabul qiling
+                  Tezkor xabarlarni SMS orqali qabul qiling
                 </p>
               </div>
               <input
@@ -168,7 +159,7 @@ export default function AdminSettings() {
               <div>
                 <p className="font-medium text-gray-900">Push-bildirishnomalar</p>
                 <p className="text-sm text-gray-600">
-                  Dasturga push-bildirishnomalar qabul qiling
+                  Dasturga push-bildirishnomalarni qabul qiling
                 </p>
               </div>
               <input
@@ -194,7 +185,7 @@ export default function AdminSettings() {
             <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
               <div>
                 <p className="font-medium text-gray-900">
-                  Ikki bosqichli tasdiqlov
+                  Ikki bosqichli tasdiqlash
                 </p>
                 <p className="text-sm text-gray-600">
                   Akkauntni xavfsizlik uchun faollashtiring
