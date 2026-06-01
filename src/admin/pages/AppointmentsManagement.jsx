@@ -95,10 +95,29 @@ export default function AppointmentsManagement() {
       return;
     }
 
+    // Extract clinic name (remove " Filiali" if present)
+    const clinicName = formData.clinic.replace(' Filiali', '');
+    
+    // Extract doctor name (remove duplicate "Dr. Dr." if present)
+    let doctorName = formData.doctor;
+    if (doctorName.startsWith('Dr. Dr.')) {
+      doctorName = doctorName.replace('Dr. Dr.', 'Dr.');
+    }
+
+    const appointmentData = {
+      patient: formData.patient,
+      initials: formData.patient.split(' ').map(n => n[0]).join('').toUpperCase(),
+      doctor: doctorName,
+      clinic: clinicName,
+      date: formData.date,
+      time: formData.time,
+      status: formData.status,
+    };
+
     if (editingId) {
-      updateAppointment(editingId, formData);
+      updateAppointment(editingId, appointmentData);
     } else {
-      addAppointment(formData);
+      addAppointment(appointmentData);
     }
     handleCloseModal();
   };
@@ -120,7 +139,10 @@ export default function AppointmentsManagement() {
               Barcha uchrashuvlarni boshqarish va kuzatish
             </p>
           </div>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors">
+          <button
+            onClick={() => handleOpenModal()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors"
+          >
             <Plus size={20} />
             Yangi qabul qo'shish
           </button>
@@ -144,13 +166,13 @@ export default function AppointmentsManagement() {
               />
             </div>
 
-            {/* Specialty filter */}
+            {/* Doctor filter */}
             <div>
               <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option>Barcha shifokorlar</option>
-                <option>Dr. Alisher Vohidov</option>
-                <option>Dr. Malika Karimova</option>
-                <option>Dr. Sardar Akhmedov</option>
+                {doctors.map(doc => (
+                  <option key={doc.id}>Dr. {doc.name}</option>
+                ))}
               </select>
             </div>
 
@@ -217,7 +239,7 @@ export default function AppointmentsManagement() {
               </thead>
               <tbody>
                 {filteredAppointments.map((appointment) => {
-                  const StatusIcon = appointment.statusIcon;
+                  const StatusIcon = statusIcons[appointment.status] || Clock;
                   return (
                     <tr
                       key={appointment.id}
@@ -226,7 +248,7 @@ export default function AppointmentsManagement() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                            {appointment.initials}
+                            {getInitials(appointment.patient)}
                           </div>
                           <span className="font-medium text-gray-900">
                             {appointment.patient}
@@ -255,7 +277,7 @@ export default function AppointmentsManagement() {
                         <div className="flex items-center gap-2">
                           <StatusIcon size={16} />
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${appointment.statusColor}`}
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[appointment.status]}`}
                           >
                             {appointment.status}
                           </span>
@@ -263,10 +285,16 @@ export default function AppointmentsManagement() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-blue-600">
+                          <button
+                            onClick={() => handleOpenModal(appointment)}
+                            className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-blue-600"
+                          >
                             <Edit size={18} />
                           </button>
-                          <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-red-600">
+                          <button
+                            onClick={() => handleDelete(appointment.id)}
+                            className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-red-600"
+                          >
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -299,6 +327,132 @@ export default function AppointmentsManagement() {
             </div>
           </div>
         </div>
+
+        {/* Modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
+              <div className="p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                  {editingId ? 'Qabulni tahrirlash' : 'Yangi qabul qo\'shish'}
+                </h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Patient Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Bemor ismi
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.patient}
+                      onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Bemor ismi"
+                    />
+                  </div>
+
+                  {/* Doctor */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Shifokor
+                    </label>
+                    <select
+                      value={formData.doctor}
+                      onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Shifokorni tanlang</option>
+                      {doctors.map(doc => (
+                        <option key={doc.id} value={`Dr. ${doc.name}`}>
+                          Dr. {doc.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Clinic */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Filial
+                    </label>
+                    <select
+                      value={formData.clinic}
+                      onChange={(e) => setFormData({ ...formData, clinic: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Filialni tanlang</option>
+                      {clinics.map(clinic => (
+                        <option key={clinic.id} value={clinic.name}>
+                          {clinic.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Date */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Sana
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Time */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Vaqt
+                    </label>
+                    <input
+                      type="time"
+                      value={formData.time}
+                      onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Holat
+                    </label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Tasdiqlangan">Tasdiqlangan</option>
+                      <option value="Kutilmoqda">Kutilmoqda</option>
+                      <option value="Yakunlandi">Yakunlandi</option>
+                      <option value="Bekor qilindi">Bekor qilindi</option>
+                    </select>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={handleCloseModal}
+                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                    >
+                      Bekor qilish
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                    >
+                      {editingId ? 'Saqlash' : 'Qo\'shish'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );
