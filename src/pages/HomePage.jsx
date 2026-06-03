@@ -1,141 +1,179 @@
-import { Search, Home, Clock, Box, User } from 'lucide-react'
+import { Search, Calendar, MapPin, Phone, Clock, ChevronRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { useAppContext } from '../context/AppContext'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const { doctors, clinics, appointments } = useAppContext()
-  const upcomingAppointment = appointments.find(a => a.status === 'Tasdiqlangan' || a.status === 'Kutilmoqda')
+  const { doctors, clinics, appointments, clinicSettings, categories } = useAppContext()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState(null)
+
   const activeDoctors = doctors.filter(d => d.status === 'FAOL')
+
+  const searched = activeDoctors.filter(d =>
+    !searchQuery ||
+    d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    d.specialization.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const displayed = selectedCategory
+    ? searched.filter(d => d.specialization === selectedCategory)
+    : searched
+
+  const mainClinic = clinics[0] || clinicSettings
+  const upcoming = appointments.find(a => a.status === 'Kutilmoqda' || a.status === 'Tasdiqlangan')
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
-      <div className="pb-20">
-        {/* Greeting Section */}
-        <div className="p-4">
-          <h1 className="text-2xl font-bold mb-2">Xayrli tong, Abdulloh</h1>
-          <p className="text-gray-600">Tishlaringiz sog'lig'i haqida qayg'urish vaqti keldi.</p>
-        </div>
 
-        {/* Search Bar */}
-        <div className="px-4 py-4">
-          <div className="flex gap-2">
-            <div className="flex-1 flex items-center bg-white rounded-full px-4 py-3 shadow-sm">
-              <Search size={20} className="text-gray-400" />
-              <input
-                type="text"
-                placeholder="Klinikalar yoki shifokorlarni izlash"
-                className="flex-1 ml-2 outline-none text-sm"
-              />
+      <div className="pb-24">
+        {/* Clinic Info Banner */}
+        <div className="bg-gradient-to-r from-primary to-blue-600 text-white p-5">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="bg-white/20 p-2 rounded-lg">
+              <MapPin size={20} />
             </div>
-            <button className="bg-primary text-white px-6 py-3 rounded-full font-semibold">
-              Qidirish
-            </button>
+            <div>
+              <h1 className="text-xl font-bold">{mainClinic?.name || clinicSettings.clinicName}</h1>
+              <p className="text-sm text-blue-100">{mainClinic?.address || clinicSettings.address}</p>
+            </div>
+          </div>
+          <div className="flex gap-4 text-sm text-blue-100 ml-11">
+            <span className="flex items-center gap-1"><Phone size={14} /> {mainClinic?.phone || clinicSettings.phone}</span>
+            <span className="flex items-center gap-1"><Clock size={14} /> {mainClinic?.hours || `${clinicSettings.workingHoursStart} - ${clinicSettings.workingHoursEnd}`}</span>
           </div>
         </div>
 
         {/* Upcoming Appointment */}
-        {upcomingAppointment && (
-          <div className="px-4 py-4">
-            <h2 className="text-lg font-bold mb-3">Kelasi qabul</h2>
-            <div className="bg-blue-100 rounded-2xl p-4">
-              <div className="flex gap-3">
-                <img
-                  src={doctors.find(d => d.name === upcomingAppointment.doctor)?.image || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Doctor'}
-                  alt="Doctor"
-                  className="w-12 h-12 rounded-full"
-                />
-                <div className="flex-1">
-                  <h3 className="font-bold">{upcomingAppointment.doctor}</h3>
-                  <p className="text-sm text-gray-600">{upcomingAppointment.clinic}</p>
-                  <div className="flex gap-4 mt-2 text-sm">
-                    <span className="bg-white px-2 py-1 rounded">{upcomingAppointment.date} {upcomingAppointment.time}</span>
-                  </div>
+        {upcoming && (
+          <div className="mx-4 -mt-3">
+            <div className="bg-blue-100 rounded-xl p-4 border border-blue-200 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="bg-blue-500 p-2 rounded-lg">
+                  <Calendar className="text-white" size={20} />
                 </div>
+                <div className="flex-1">
+                  <p className="text-xs text-blue-600 font-semibold mb-1">KELASI QABUL</p>
+                  <p className="font-bold text-gray-900">{upcoming.doctor}</p>
+                  <p className="text-sm text-gray-600">{upcoming.date} • {upcoming.time}</p>
+                </div>
+                <button onClick={() => navigate('/history')} className="text-blue-600 text-sm font-semibold">Batafsil</button>
               </div>
             </div>
           </div>
         )}
 
+        {/* Search */}
+        <div className="px-4 mt-5">
+          <div className="flex gap-2">
+            <div className="flex-1 flex items-center bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100">
+              <Search size={20} className="text-gray-400" />
+              <input
+                type="text"
+                placeholder="Shifokor nomi yoki mutaxassislik..."
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setSelectedCategory(null) }}
+                className="flex-1 ml-2 outline-none text-sm"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Categories */}
-        <div className="px-4 py-4">
-          <h2 className="text-lg font-bold mb-3">Kategoriyalar</h2>
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {['Hammasi', 'Umumiy', 'Ortodontist', 'Kosmetik', 'Implant'].map((category) => (
+        <div className="px-4 mt-4">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
+                !selectedCategory ? 'bg-primary text-white' : 'bg-white border border-gray-200 text-gray-700'
+              }`}
+            >
+              Barcha shifokorlar
+            </button>
+            {categories.map(cat => (
               <button
-                key={category}
-                className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm font-semibold whitespace-nowrap"
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
+                  selectedCategory === cat ? 'bg-primary text-white' : 'bg-white border border-gray-200 text-gray-700'
+                }`}
               >
-                {category}
+                {cat}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Featured Clinics */}
-        <div className="px-4 py-4">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-bold">Yaqin atrofdagi klinikalar</h2>
-            <button onClick={() => navigate('/clinics')} className="text-primary text-sm font-semibold">Barchasi</button>
-          </div>
-          <div className="space-y-3">
-            {clinics.slice(0, 3).map((clinic) => (
-              <div key={clinic.id} className="bg-white rounded-lg p-4 flex gap-3 cursor-pointer hover:shadow-md">
-                <img
-                  src={clinic.image}
-                  alt={clinic.name}
-                  className="w-16 h-16 rounded-lg"
-                />
-                <div className="flex-1">
-                  <h3 className="font-bold">{clinic.name}</h3>
-                  <div className="flex items-center gap-2 my-1">
-                    <span className="text-yellow-400">⭐</span>
-                    <span>{clinic.rating}</span>
-                    <span className="text-gray-500">• {clinic.distance} km</span>
-                  </div>
-                  <div className="flex gap-2">
-                    {clinic.services.slice(0, 2).map((s) => (
-                      <span key={s} className="text-xs bg-blue-100 text-primary px-2 py-1 rounded">{s}</span>
-                    ))}
-                  </div>
-                </div>
-                <span className="text-primary text-xl">→</span>
-              </div>
-            ))}
-          </div>
+        {/* Doctor count */}
+        <div className="px-4 mt-3">
+          <p className="text-sm text-gray-500">
+            {displayed.length} ta shifokor
+            {selectedCategory && ` • ${selectedCategory}`}
+            {searchQuery && ` • "${searchQuery}"`}
+          </p>
         </div>
 
-        {/* Featured Doctors */}
-        <div className="px-4 py-4">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-bold">Mashhur shifokorlar</h2>
-            <button onClick={() => navigate('/doctors')} className="text-primary text-sm font-semibold">Barchasi</button>
-          </div>
-          <div className="space-y-3">
-            {activeDoctors.slice(0, 3).map((doctor) => (
-              <div
-                key={doctor.id}
-                className="bg-white rounded-lg p-4 flex gap-3 cursor-pointer hover:shadow-md"
-                onClick={() => navigate(`/doctor/${doctor.id}`)}
-              >
-                <img
-                  src={doctor.image}
-                  alt={doctor.name}
-                  className="w-12 h-12 rounded-full"
-                />
-                <div className="flex-1">
-                  <h3 className="font-bold">{doctor.name}</h3>
-                  <p className="text-sm text-gray-600">{doctor.specialization}</p>
+        {/* Doctors */}
+        <div className="px-4 mt-3 space-y-3">
+          {displayed.map((doctor) => (
+            <div
+              key={doctor.id}
+              onClick={() => navigate(`/doctor/${doctor.id}`)}
+              className="bg-white rounded-xl p-4 flex gap-3 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition"
+            >
+              <img
+                src={doctor.image}
+                alt={doctor.name}
+                className="w-14 h-14 rounded-full object-cover border-2 border-blue-100"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-bold text-gray-900 truncate">{doctor.name}</h3>
+                  {doctor.verified && <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">✓</span>}
                 </div>
-                <button className="text-gray-400 text-xs">Band qilish</button>
+                <p className="text-sm text-blue-600 font-medium">{doctor.specialization}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  <Clock size={12} className="inline mr-1" />
+                  {doctor.workingHours} • {doctor.experience} tajriba
+                </p>
               </div>
-            ))}
-          </div>
+              <div className="flex flex-col items-center justify-center">
+                <div className="flex items-center gap-0.5 text-yellow-500 text-sm font-bold">
+                  ⭐{doctor.rating}
+                </div>
+                <span className="text-xs text-gray-400">({doctor.reviews})</span>
+              </div>
+            </div>
+          ))}
+          {displayed.length === 0 && (
+            <div className="text-center py-12 text-gray-400">
+              <p className="text-lg">Hech narsa topilmadi</p>
+              <p className="text-sm mt-1">Boshqa qidiruv so'zini kiriting yoki kategoryani o'zgartiring</p>
+            </div>
+          )}
         </div>
+
+        {/* Branches */}
+        {clinics.length > 1 && (
+          <div className="px-4 mt-5">
+            <h2 className="text-lg font-bold mb-3">Filiallar</h2>
+            <div className="space-y-2">
+              {clinics.map(c => (
+                <div key={c.id} className="bg-white rounded-xl p-3 flex items-center gap-3 shadow-sm border border-gray-100">
+                  <MapPin size={18} className="text-primary flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-sm">{c.name}</p>
+                    <p className="text-xs text-gray-500">{c.address}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <BottomNav />

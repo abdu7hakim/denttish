@@ -18,6 +18,8 @@ export default function DoctorsManagement() {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const dayOptions = ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -26,6 +28,8 @@ export default function DoctorsManagement() {
     experience: '',
     patients: '',
     status: 'FAOL',
+    workingHours: '09:00 - 18:00',
+    workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
   });
 
   const { doctors, addDoctor, updateDoctor, deleteDoctor } = useAppContext();
@@ -61,6 +65,8 @@ export default function DoctorsManagement() {
       experience: '',
       patients: '',
       status: 'FAOL',
+      workingHours: '09:00 - 18:00',
+      workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
     });
     setShowForm(false);
   };
@@ -100,6 +106,8 @@ export default function DoctorsManagement() {
                 experience: '',
                 patients: '',
                 status: 'FAOL',
+                workingHours: '09:00 - 18:00',
+                workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
               });
             }}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors"
@@ -160,6 +168,35 @@ export default function DoctorsManagement() {
                   onChange={(e) => setFormData({...formData, patients: e.target.value})}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                <input
+                  type="text"
+                  placeholder="Ish vaqti (masalan: 09:00 - 18:00)"
+                  value={formData.workingHours}
+                  onChange={(e) => setFormData({...formData, workingHours: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">Ish kunlari</p>
+                  <div className="flex flex-wrap gap-2">
+                    {dayOptions.map(day => (
+                      <label key={day} className="flex items-center gap-1 text-sm cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.workingDays.includes(day)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData({...formData, workingDays: [...formData.workingDays, day]});
+                            } else {
+                              setFormData({...formData, workingDays: formData.workingDays.filter(d => d !== day)});
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 rounded"
+                        />
+                        {day}
+                      </label>
+                    ))}
+                  </div>
+                </div>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({...formData, status: e.target.value})}

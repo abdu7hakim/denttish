@@ -8,6 +8,7 @@ import {
   LogOut,
   Menu,
   X,
+  Stethoscope,
 } from 'lucide-react';
 
 export default function AdminSidebar({ isOpen, toggleSidebar }) {
@@ -31,6 +32,12 @@ export default function AdminSidebar({ isOpen, toggleSidebar }) {
       icon: Calendar,
       path: '/admin/appointments',
       key: 'appointments',
+    },
+    {
+      label: 'Yo\'nalishlar',
+      icon: Stethoscope,
+      path: '/admin/categories',
+      key: 'categories',
     },
     {
       label: 'Sozlamalar',

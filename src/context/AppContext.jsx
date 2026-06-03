@@ -33,6 +33,8 @@ const initialDoctors = [
     avatarBg: 'bg-blue-500',
     image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
     verified: true,
+    workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
+    workingHours: '09:00 - 17:00',
   },
   {
     id: 2,
@@ -51,6 +53,8 @@ const initialDoctors = [
     avatarBg: 'bg-green-500',
     image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus',
     verified: true,
+    workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Juma', 'Shanba'],
+    workingHours: '10:00 - 18:00',
   },
   {
     id: 3,
@@ -69,6 +73,8 @@ const initialDoctors = [
     avatarBg: 'bg-red-500',
     image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Elena',
     verified: true,
+    workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba'],
+    workingHours: '09:00 - 16:00',
   },
   {
     id: 4,
@@ -87,6 +93,8 @@ const initialDoctors = [
     avatarBg: 'bg-purple-500',
     image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed',
     verified: false,
+    workingDays: ['Dushanba', 'Chorshanba', 'Juma'],
+    workingHours: '14:00 - 20:00',
   },
   {
     id: 5,
@@ -105,6 +113,8 @@ const initialDoctors = [
     avatarBg: 'bg-teal-500',
     image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Anna',
     verified: true,
+    workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
+    workingHours: '08:00 - 16:00',
   },
   {
     id: 6,
@@ -123,6 +133,8 @@ const initialDoctors = [
     avatarBg: 'bg-indigo-500',
     image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Juan',
     verified: true,
+    workingDays: ['Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'],
+    workingHours: '11:00 - 19:00',
   },
 ];
 
@@ -256,6 +268,8 @@ export function AppProvider({ children }) {
       verified: true,
       subspecialty: doctor.subspecialty || '',
       phone: doctor.phone || '',
+      workingDays: doctor.workingDays || ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
+      workingHours: doctor.workingHours || '09:00 - 18:00',
     };
     setDoctors([...doctors, newDoctor]);
   };
@@ -334,6 +348,27 @@ export function AppProvider({ children }) {
     setClinicSettings({ ...clinicSettings, ...settings });
   };
 
+  // Categories derived from doctor specializations + manual additions
+  const [extraCategories, setExtraCategories] = useState([]);
+
+  const categories = [...new Set([
+    ...doctors.filter(d => d.status === 'FAOL').map(d => d.specialization),
+    ...extraCategories,
+  ])].filter(Boolean).sort();
+
+  const addCategory = (name) => {
+    if (name && !categories.includes(name)) {
+      setExtraCategories([...extraCategories, name]);
+    }
+  };
+
+  const removeCategory = (name) => {
+    const hasDoctor = doctors.some(d => d.specialization === name);
+    if (!hasDoctor) {
+      setExtraCategories(extraCategories.filter(c => c !== name));
+    }
+  };
+
   const getStatistics = () => {
     return {
       totalDoctors: doctors.length,
@@ -351,6 +386,7 @@ export function AppProvider({ children }) {
     clinics, setClinics, addClinic, updateClinic, deleteClinic,
     clinicSettings, updateClinicSettings,
     lastBooking, setLastBooking,
+    categories, addCategory, removeCategory,
     getStatistics,
   };
 
