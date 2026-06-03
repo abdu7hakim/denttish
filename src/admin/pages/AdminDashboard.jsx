@@ -39,13 +39,13 @@ export default function AdminDashboard() {
   ]);
 
   return (
-    <AdminLayout adminName="Dr. Alisher V.">
+    <AdminLayout adminName="Admin">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">
-              Xush kelibsiz, Alisher! 👋
+              Xush kelibsiz, Admin! 👋
             </h1>
             <p className="text-gray-600 mt-1">
               Bugungi klinika holati va asosiy ko'rsatkichlar

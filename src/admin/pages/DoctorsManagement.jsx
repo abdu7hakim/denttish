@@ -20,6 +20,8 @@ export default function DoctorsManagement() {
   const [editingId, setEditingId] = useState(null);
   const dayOptions = ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
 
+  const unknownColors = ['bg-blue-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-teal-500', 'bg-indigo-500', 'bg-pink-500', 'bg-orange-500'];
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -27,6 +29,7 @@ export default function DoctorsManagement() {
     subspecialty: '',
     experience: '',
     patients: '',
+    image: '',
     status: 'FAOL',
     workingHours: '09:00 - 18:00',
     workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
@@ -57,25 +60,26 @@ export default function DoctorsManagement() {
     } else {
       addDoctor(formData);
     }
-    setFormData({
-      name: '',
-      phone: '',
-      specialization: '',
-      subspecialty: '',
-      experience: '',
-      patients: '',
-      status: 'FAOL',
-      workingHours: '09:00 - 18:00',
-      workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
-    });
-    setShowForm(false);
-  };
+      setFormData({
+        name: '',
+        phone: '',
+        specialization: '',
+        subspecialty: '',
+        experience: '',
+        patients: '',
+        image: '',
+        status: 'FAOL',
+        workingHours: '09:00 - 18:00',
+        workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
+      });
+      setShowForm(false);
+    };
 
-  const handleEdit = (doctor) => {
-    setFormData(doctor);
-    setEditingId(doctor.id);
-    setShowForm(true);
-  };
+    const handleEdit = (doctor) => {
+      setFormData(doctor);
+      setEditingId(doctor.id);
+      setShowForm(true);
+    };
 
   const handleDelete = (id) => {
     if (confirm('Haqiqatan ham o\'chirib tashlamoqchisiz?')) {
@@ -105,6 +109,7 @@ export default function DoctorsManagement() {
                 subspecialty: '',
                 experience: '',
                 patients: '',
+                image: '',
                 status: 'FAOL',
                 workingHours: '09:00 - 18:00',
                 workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
@@ -140,6 +145,22 @@ export default function DoctorsManagement() {
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                <div className="flex items-center gap-3">
+                  <div className={`${formData.image ? '' : unknownColors[doctors.length % unknownColors.length]} w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0 overflow-hidden`}>
+                    {formData.image ? (
+                      <img src={formData.image} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      formData.name ? formData.name.replace('Dr. ', '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?'
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Rasm URL (ixtiyoriy)"
+                    value={formData.image}
+                    onChange={(e) => setFormData({...formData, image: e.target.value})}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
                 <input
                   type="text"
                   placeholder="Mutaxassislik"

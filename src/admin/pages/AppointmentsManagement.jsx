@@ -8,14 +8,13 @@ import {
   Download,
   Edit,
   Trash2,
-  Plus,
   CheckCircle,
   Clock,
   X,
 } from 'lucide-react';
 
 export default function AppointmentsManagement() {
-  const { doctors, clinics, appointments, addAppointment, updateAppointment, deleteAppointment } = useAppContext();
+  const { doctors, appointments, updateAppointment, deleteAppointment } = useAppContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('');
@@ -57,28 +56,16 @@ export default function AppointmentsManagement() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleOpenModal = (appointment = null) => {
-    if (appointment) {
-      setEditingId(appointment.id);
-      setFormData({
-        patient: appointment.patient,
-        doctor: appointment.doctor,
-        clinic: appointment.clinic,
-        date: appointment.date,
-        time: appointment.time,
-        status: appointment.status,
-      });
-    } else {
-      setEditingId(null);
-      setFormData({
-        patient: '',
-        doctor: '',
-        clinic: '',
-        date: '',
-        time: '',
-        status: 'Kutilmoqda',
-      });
-    }
+  const handleOpenModal = (appointment) => {
+    setEditingId(appointment.id);
+    setFormData({
+      patient: appointment.patient,
+      phone: appointment.phone || '',
+      doctor: appointment.doctor,
+      date: appointment.date,
+      time: appointment.time,
+      status: appointment.status,
+    });
     setShowModal(true);
   };
 
@@ -89,29 +76,7 @@ export default function AppointmentsManagement() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.patient || !formData.doctor || !formData.clinic || !formData.date || !formData.time) {
-      alert('Barcha maydonlarni to\'ldiring');
-      return;
-    }
-
-    // Extract clinic name (remove " Filiali" if present)
-    const clinicName = formData.clinic.replace(' Filiali', '');
-
-    const appointmentData = {
-      patient: formData.patient,
-      initials: formData.patient.split(' ').map(n => n[0]).join('').toUpperCase(),
-      doctor: formData.doctor,
-      clinic: clinicName,
-      date: formData.date,
-      time: formData.time,
-      status: formData.status,
-    };
-
-    if (editingId) {
-      updateAppointment(editingId, appointmentData);
-    } else {
-      addAppointment(appointmentData);
-    }
+    updateAppointment(editingId, { status: formData.status });
     handleCloseModal();
   };
 
@@ -132,13 +97,7 @@ export default function AppointmentsManagement() {
               Barcha uchrashuvlarni boshqarish va kuzatish
             </p>
           </div>
-          <button
-            onClick={() => handleOpenModal()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors"
-          >
-            <Plus size={20} />
-            Yangi qabul qo'shish
-          </button>
+          <span className="text-sm text-gray-500">Qabullar faqat bemorlar tomonidan yaratiladi</span>
         </div>
 
         {/* Filters */}
@@ -217,6 +176,9 @@ export default function AppointmentsManagement() {
                     Shifokor
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase">
+                    Telefon
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase">
                     Filial
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase">
@@ -250,6 +212,9 @@ export default function AppointmentsManagement() {
                       </td>
                       <td className="px-6 py-4 text-gray-700">
                         {appointment.doctor}
+                      </td>
+                      <td className="px-6 py-4 text-gray-700 text-sm">
+                        {appointment.phone || '-'}
                       </td>
                       <td className="px-6 py-4 text-gray-700">
                         {appointment.clinic}
@@ -327,91 +292,20 @@ export default function AppointmentsManagement() {
             <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
               <div className="p-6">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  {editingId ? 'Qabulni tahrirlash' : 'Yangi qabul qo\'shish'}
+                  Qabul ma'lumotlari
                 </h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Patient Name */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Bemor ismi
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.patient}
-                      onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Bemor ismi"
-                    />
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+                    <div><span className="font-medium text-gray-700">Bemor:</span> {formData.patient}</div>
+                    <div><span className="font-medium text-gray-700">Telefon:</span> {formData.phone || '-'}</div>
+                    <div><span className="font-medium text-gray-700">Shifokor:</span> {formData.doctor}</div>
+                    <div><span className="font-medium text-gray-700">Sana:</span> {formData.date}</div>
+                    <div><span className="font-medium text-gray-700">Vaqt:</span> {formData.time}</div>
                   </div>
 
-                  {/* Doctor */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Shifokor
-                    </label>
-                    <select
-                      value={formData.doctor}
-                      onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Shifokorni tanlang</option>
-                      {doctors.map(doc => (
-                        <option key={doc.id} value={doc.name}>
-                          {doc.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Clinic */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Filial
-                    </label>
-                    <select
-                      value={formData.clinic}
-                      onChange={(e) => setFormData({ ...formData, clinic: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Filialni tanlang</option>
-                      {clinics.map(clinic => (
-                        <option key={clinic.id} value={clinic.name}>
-                          {clinic.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Date */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Sana
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  {/* Time */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Vaqt
-                    </label>
-                    <input
-                      type="time"
-                      value={formData.time}
-                      onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  {/* Status */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Holat
+                      Holatni o'zgartirish
                     </label>
                     <select
                       value={formData.status}
@@ -425,20 +319,19 @@ export default function AppointmentsManagement() {
                     </select>
                   </div>
 
-                  {/* Buttons */}
                   <div className="flex gap-3 pt-4">
                     <button
                       type="button"
                       onClick={handleCloseModal}
                       className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
                     >
-                      Bekor qilish
+                      Yopish
                     </button>
                     <button
                       type="submit"
                       className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
                     >
-                      {editingId ? 'Saqlash' : 'Qo\'shish'}
+                      Saqlash
                     </button>
                   </div>
                 </form>

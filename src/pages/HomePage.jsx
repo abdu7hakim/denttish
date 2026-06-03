@@ -125,11 +125,13 @@ export default function HomePage() {
               onClick={() => navigate(`/doctor/${doctor.id}`)}
               className="bg-white rounded-xl p-4 flex gap-3 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition"
             >
-              <img
-                src={doctor.image}
-                alt={doctor.name}
-                className="w-14 h-14 rounded-full object-cover border-2 border-blue-100"
-              />
+              {doctor.image ? (
+                <img src={doctor.image} alt={doctor.name} className="w-14 h-14 rounded-full object-cover border-2 border-blue-100" />
+              ) : (
+                <div className={`w-14 h-14 rounded-full border-2 border-blue-100 flex items-center justify-center text-white font-bold text-sm ${doctor.avatarBg}`}>
+                  {doctor.avatar}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-bold text-gray-900 truncate">{doctor.name}</h3>
