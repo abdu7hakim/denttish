@@ -5,7 +5,7 @@ import SignupModal from './SignupModal'
 import logoImg from '../../images/logo.png'
 
 export default function Header() {
-  const { currentUser, userNotifications, clearUserNotification, clearAllUserNotifications } = useAppContext()
+  const { currentUser, userNotifications, clearUserNotification, clearAllUserNotifications, markAllUserNotificationsRead } = useAppContext()
   const [notifOpen, setNotifOpen] = useState(false)
   const ref = useRef()
 
@@ -17,6 +17,12 @@ export default function Header() {
 
   const unreadCount = userNotifications.filter(n => !n.read).length
 
+  const toggleNotif = () => {
+    const opening = !notifOpen;
+    setNotifOpen(opening);
+    if (opening && unreadCount > 0) markAllUserNotificationsRead();
+  };
+
   return (
     <>
       <SignupModal />
@@ -26,7 +32,7 @@ export default function Header() {
 
           <div className="relative" ref={ref}>
             <button
-              onClick={() => setNotifOpen(!notifOpen)}
+              onClick={toggleNotif}
               className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <Bell size={20} className="text-gray-600" />

@@ -4,6 +4,22 @@ import { useAppContext } from '../context/AppContext';
 
 const ADMIN_URL = 'https://admin-denttish.vercel.app';
 
+function normalizePhone(raw) {
+  return raw.replace(/\s/g, '');
+}
+
+function formatPhone(raw) {
+  const digits = raw.replace(/[^\d]/g, '');
+  if (!digits.startsWith('998')) return raw;
+  const rest = digits.slice(3);
+  let out = '+998';
+  if (rest.length > 0) out += ' ' + rest.slice(0, 2);
+  if (rest.length > 2) out += ' ' + rest.slice(2, 5);
+  if (rest.length > 5) out += ' ' + rest.slice(5, 7);
+  if (rest.length > 7) out += ' ' + rest.slice(7, 9);
+  return out;
+}
+
 export default function SignupModal() {
   const { currentUser, registerUser, setCurrentUser, allUsers } = useAppContext();
   const [open, setOpen] = useState(!currentUser);
@@ -19,20 +35,22 @@ export default function SignupModal() {
   const handleRegister = (e) => {
     e.preventDefault();
     setError('');
-    if (!name.trim() || !phone.trim()) return;
-    if (allUsers.some(u => u.phone === phone.trim())) {
+    const raw = normalizePhone(phone);
+    if (!name.trim() || !raw) return;
+    if (allUsers.some(u => normalizePhone(u.phone) === raw)) {
       setError('Bu telefon raqam avval ro\'yxatdan o\'tgan. Log in qiling.');
       return;
     }
-    registerUser(name.trim(), phone.trim());
+    registerUser(name.trim(), raw);
     setOpen(false);
   };
 
   const handleLogin = (e) => {
     e.preventDefault();
     setError('');
-    if (!name.trim() || !phone.trim()) return;
-    const user = allUsers.find(u => u.name === name.trim() && u.phone === phone.trim());
+    const raw = normalizePhone(phone);
+    if (!name.trim() || !raw) return;
+    const user = allUsers.find(u => u.name === name.trim() && normalizePhone(u.phone) === raw);
     if (user) {
       setCurrentUser(user);
       setOpen(false);
@@ -114,7 +132,7 @@ export default function SignupModal() {
                   <Phone size={18} className="text-gray-400" />
                   <input
                     type="tel" placeholder="+998 90 123 45 67" value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => setPhone(formatPhone(e.target.value))}
                     className="flex-1 bg-transparent outline-none text-sm" required
                   />
                 </div>
