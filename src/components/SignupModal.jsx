@@ -4,6 +4,8 @@ import { User as UserIcon, Phone, Shield } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import * as api from '../api';
 
+const ADMIN_URL = import.meta.env.VITE_ADMIN_URL || '/admin/login';
+
 function normalizePhone(raw) {
   return raw.replace(/\s/g, '');
 }
@@ -22,7 +24,7 @@ function formatPhone(raw) {
 
 export default function SignupModal() {
   const navigate = useNavigate();
-  const { currentUser, registerUser, setCurrentUser, allUsers } = useAppContext();
+  const { currentUser, registerUser, loginUser, setCurrentUser, allUsers } = useAppContext();
   const [open, setOpen] = useState(!currentUser);
   const [authMode, setAuthMode] = useState('register');
   const [name, setName] = useState('');
@@ -49,15 +51,13 @@ export default function SignupModal() {
       const result = await api.apiRegister(name.trim(), raw);
       if (result?.user) {
         setCurrentUser(result.user);
-        setOpen(false);
       } else {
         registerUser(name.trim(), raw);
-        setOpen(false);
       }
     } catch {
       registerUser(name.trim(), raw);
-      setOpen(false);
     }
+    setOpen(false);
     setLoading(false);
   };
 
@@ -73,13 +73,13 @@ export default function SignupModal() {
         setCurrentUser(result.user);
         setOpen(false);
       } else {
-        const user = allUsers.find(u => u.name === name.trim() && normalizePhone(u.phone) === raw);
-        if (user) { setCurrentUser(user); setOpen(false); }
+        const localUser = allUsers.find(u => u.name === name.trim() && normalizePhone(u.phone) === raw);
+        if (localUser) { setCurrentUser(localUser); setOpen(false); }
         else setError('Foydalanuvchi topilmadi. Ro\'yxatdan o\'ting.');
       }
     } catch {
-      const user = allUsers.find(u => u.name === name.trim() && normalizePhone(u.phone) === raw);
-      if (user) { setCurrentUser(user); setOpen(false); }
+      const localUser = allUsers.find(u => u.name === name.trim() && normalizePhone(u.phone) === raw);
+      if (localUser) { setCurrentUser(localUser); setOpen(false); }
       else setError('Foydalanuvchi topilmadi. Ro\'yxatdan o\'ting.');
     }
     setLoading(false);
@@ -89,36 +89,24 @@ export default function SignupModal() {
     e.preventDefault();
     setAdminError('');
     setLoading(true);
-
     if (!adminUser || !adminPass) {
       setAdminError('Username va parolni kiriting');
       setLoading(false);
       return;
     }
-
     try {
       const result = await api.apiAdminLogin(adminUser, adminPass);
       if (result?.token) {
         api.setAdminToken(result.token);
-        setOpen(false);
-        navigate('/admin/dashboard');
+        window.open(ADMIN_URL, '_blank');
+        setAdminMode(false);
+        setAdminUser('');
+        setAdminPass('');
       } else {
-        if (adminUser === 'admin' && adminPass === 'admin3379') {
-          api.setAdminToken('offline-admin-' + Date.now());
-          setOpen(false);
-          navigate('/admin/dashboard');
-        } else {
-          setAdminError('Username yoki parol noto\'g\'ri');
-        }
+        setAdminError('Username yoki parol noto\'g\'ri');
       }
     } catch {
-      if (adminUser === 'admin' && adminPass === 'admin3379') {
-        api.setAdminToken('offline-admin-' + Date.now());
-        setOpen(false);
-        navigate('/admin/dashboard');
-      } else {
-        setAdminError('Serverga ulanib bo\'lmadi');
-      }
+      setAdminError('Serverga ulanib bo\'lmadi');
     }
     setLoading(false);
   };
@@ -142,7 +130,7 @@ export default function SignupModal() {
               <button type="submit" disabled={loading} className="w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition disabled:bg-gray-300">
                 {loading ? 'Kirish...' : 'Admin panelga kirish'}
               </button>
-              <button type="button" onClick={() => { setAdminMode(false); setAdminError('') }} className="w-full text-gray-500 text-sm py-2 hover:text-gray-700">← Orqaga</button>
+              <button type="button" onClick={() => { setAdminMode(false); setAdminError(''); setAdminUser(''); setAdminPass('') }} className="w-full text-gray-500 text-sm py-2 hover:text-gray-700">← Orqaga</button>
             </form>
           </>
         ) : (

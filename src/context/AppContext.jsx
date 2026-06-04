@@ -29,9 +29,13 @@ function saveLocal(key, data) {
   try { localStorage.setItem(`denttish_${key}`, JSON.stringify(data)); } catch {}
 }
 
+function clearLocal(key) {
+  try { localStorage.removeItem(`denttish_${key}`); } catch {}
+}
+
 export function AppProvider({ children }) {
   const [doctors, setDoctors] = useState(() => loadLocal('doctors', seedDoctors));
-  const [appointments, setAppointments] = useState(() => loadLocal('appointments', []));
+  const [myAppointments, setMyAppointments] = useState([]);
   const [clinicSettings, setClinicSettings] = useState(() => loadLocal('settings', defaultSettings));
   const [extraCategories, setExtraCategories] = useState(() => loadLocal('extraCategories', []));
   const [currentUser, setCurrentUser] = useState(() => loadLocal('currentUser', null));
@@ -39,13 +43,6 @@ export function AppProvider({ children }) {
   const [adminNotifications, setAdminNotifications] = useState(() => loadLocal('adminNotifications', []));
   const [lastBookingMap, setLastBookingMap] = useState(() => loadLocal('lastBooking', {}));
   const [userNotifications, setUserNotifications] = useState([]);
-
-  const loadUserNotifications = useCallback((phone) => {
-    const all = loadLocal(`userNotifications_${phone}`, []);
-    const cutoff = Date.now() - 86400000;
-    const fresh = all.filter(n => new Date(n.time).getTime() > cutoff);
-    setUserNotifications(fresh.slice(0, 20));
-  }, []);
 
   const getLastBooking = useCallback(() => {
     if (!currentUser?.phone) return null;
@@ -62,34 +59,45 @@ export function AppProvider({ children }) {
   }, [currentUser?.phone]);
 
   useEffect(() => {
-    api.apiGetDoctors().then(data => { if (data) { setDoctors(data); saveLocal('doctors', data); } }).catch(() => {});
-    api.apiGetAppointments().then(data => { if (data) { setAppointments(data); saveLocal('appointments', data); } }).catch(() => {});
-    api.apiGetUsers().then(data => { if (data) { setAllUsers(data); saveLocal('allUsers', data); } }).catch(() => {});
-    api.apiGetSettings().then(data => { if (data) { setClinicSettings(data); saveLocal('settings', data); } }).catch(() => {});
-    api.apiGetNotifications('admin').then(data => { if (data) { setAdminNotifications(data); saveLocal('adminNotifications', data); } }).catch(() => {});
+    api.apiGetDoctors().then(data => {
+      if (data && data.length > 0) { setDoctors(data); saveLocal('doctors', data); }
+    }).catch(() => {});
+    api.apiGetSettings().then(data => {
+      if (data) { setClinicSettings(data); saveLocal('settings', data); }
+    }).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (currentUser?.phone) {
+      setMyAppointments([]);
+      api.apiGetAppointments(currentUser.phone).then(data => {
+        if (data) setMyAppointments(data);
+      }).catch(() => {});
+    } else {
+      setMyAppointments([]);
+    }
+  }, [currentUser?.phone]);
+
+  useEffect(() => {
+    if (currentUser?.phone) {
+      api.apiGetNotifications(currentUser.phone).then(data => {
+        if (data) {
+          const cutoff = Date.now() - 86400000;
+          const fresh = data.filter(n => new Date(n.time).getTime() > cutoff).slice(0, 20);
+          setUserNotifications(fresh);
+        }
+      }).catch(() => {});
+    } else {
+      setUserNotifications([]);
+    }
+  }, [currentUser?.phone]);
+
   useEffect(() => { saveLocal('doctors', doctors); }, [doctors]);
-  useEffect(() => { saveLocal('appointments', appointments); }, [appointments]);
   useEffect(() => { saveLocal('settings', clinicSettings); }, [clinicSettings]);
   useEffect(() => { saveLocal('extraCategories', extraCategories); }, [extraCategories]);
   useEffect(() => { saveLocal('currentUser', currentUser); }, [currentUser]);
   useEffect(() => { saveLocal('allUsers', allUsers); }, [allUsers]);
   useEffect(() => { saveLocal('adminNotifications', adminNotifications); }, [adminNotifications]);
-  useEffect(() => {
-    if (currentUser?.phone) saveLocal(`userNotifications_${currentUser.phone}`, userNotifications);
-  }, [userNotifications, currentUser?.phone]);
-
-  useEffect(() => {
-    if (currentUser?.phone) {
-      loadUserNotifications(currentUser.phone);
-      api.apiGetNotifications(currentUser.phone).then(data => {
-        if (data) { setUserNotifications(data); saveLocal(`userNotifications_${currentUser.phone}`, data); }
-      }).catch(() => {});
-    } else {
-      setUserNotifications([]);
-    }
-  }, [currentUser?.phone, loadUserNotifications]);
 
   const addAdminNotification = useCallback((message, type = 'info') => {
     const notif = { id: Date.now(), message, type, time: new Date().toISOString(), read: false };
@@ -113,7 +121,6 @@ export function AppProvider({ children }) {
 
   const clearUserNotification = useCallback((id) => {
     setUserNotifications(prev => prev.filter(n => n.id !== id));
-    api.apiMarkRead(id).catch(() => {});
   }, []);
 
   const markUserNotificationRead = useCallback((id) => {
@@ -127,34 +134,48 @@ export function AppProvider({ children }) {
 
   const clearAllUserNotifications = useCallback(() => {
     setUserNotifications([]);
-    if (currentUser?.phone) saveLocal(`userNotifications_${currentUser.phone}`, []);
-  }, [currentUser?.phone]);
+  }, []);
 
   const registerUser = useCallback(async (name, phone) => {
     const user = { name, phone, registeredAt: new Date().toISOString() };
     setCurrentUser(user);
-    setAllUsers(prev => {
-      if (prev.some(u => u.phone === phone)) return prev;
-      return [...prev, user];
-    });
+    setMyAppointments([]);
+    clearLocal('appointments');
     addUserNotification(`Xush kelibsiz, ${name}! DentTish ilovasiga muvaffaqiyatli ro'yxatdan o'tdingiz.`, 'welcome');
     try {
       const result = await api.apiRegister(name, phone);
-      if (result?.user) {
-        setCurrentUser(result.user);
-        setAllUsers(prev => {
-          if (prev.some(u => u.phone === phone)) return prev;
-          return [...prev, result.user];
-        });
-      }
+      if (result?.user) setCurrentUser(result.user);
     } catch {}
   }, [addUserNotification]);
+
+  const loginUser = useCallback(async (name, phone) => {
+    try {
+      const result = await api.apiLogin(name, phone);
+      if (result?.user) {
+        setCurrentUser(result.user);
+        setMyAppointments([]);
+        return result.user;
+      }
+    } catch {}
+    const user = { name, phone, registeredAt: new Date().toISOString() };
+    setCurrentUser(user);
+    setMyAppointments([]);
+    return user;
+  }, []);
 
   const updateCurrentUser = useCallback((name, phone) => {
     const oldPhone = currentUser?.phone;
     setCurrentUser(prev => ({ ...prev, name, phone }));
     setAllUsers(prev => prev.map(u => u.phone === oldPhone ? { ...u, name, phone } : u));
   }, [currentUser]);
+
+  const logoutUser = useCallback(() => {
+    setCurrentUser(null);
+    setMyAppointments([]);
+    setUserNotifications([]);
+    clearLocal('currentUser');
+    clearLocal('appointments');
+  }, []);
 
   const addDoctor = (doctor) => {
     const id = doctors.length > 0 ? Math.max(...doctors.map(d => d.id)) + 1 : 1;
@@ -186,19 +207,21 @@ export function AppProvider({ children }) {
   };
 
   const addAppointment = (appointment) => {
-    const id = appointments.length > 0 ? Math.max(...appointments.map(a => a.id)) + 1 : 1;
     const statusColors = { 'Tasdiqlangan': 'bg-green-100 text-green-800', 'Kutilmoqda': 'bg-yellow-100 text-yellow-800', 'Yakunlandi': 'bg-blue-100 text-blue-800', 'Bekor qilindi': 'bg-red-100 text-red-800' };
+    const id = Date.now();
     const newAppointment = { ...appointment, id, initials: appointment.patient.split(' ').map(n => n[0]).join('').toUpperCase(), phone: appointment.phone || '', statusColor: statusColors[appointment.status] || statusColors['Kutilmoqda'] };
-    setAppointments([...appointments, newAppointment]);
+    setMyAppointments(prev => [...prev, newAppointment]);
     setLastBookingForUser(newAppointment);
     addUserNotification(`Siz ${appointment.doctor} qabuliga yozildingiz (${appointment.date}, ${appointment.time})`, 'booking');
     addAdminNotification(`${appointment.patient} → ${appointment.doctor} (${appointment.date}, ${appointment.time})`, 'booking');
-    api.apiAddAppointment(newAppointment).then(data => { if (data) setAppointments(prev => prev.map(a => a.id === data.id ? data : a)); }).catch(() => {});
+    api.apiAddAppointment(newAppointment).then(data => {
+      if (data) setMyAppointments(prev => prev.map(a => a.id === id ? data : a));
+    }).catch(() => {});
   };
 
   const updateAppointment = (id, updatedData) => {
     const statusColors = { 'Tasdiqlangan': 'bg-green-100 text-green-800', 'Kutilmoqda': 'bg-yellow-100 text-yellow-800', 'Yakunlandi': 'bg-blue-100 text-blue-800', 'Bekor qilindi': 'bg-red-100 text-red-800' };
-    setAppointments(appointments.map(a => {
+    setMyAppointments(prev => prev.map(a => {
       if (a.id === id) {
         const updated = { ...a, ...updatedData };
         updated.statusColor = statusColors[updated.status] || statusColors['Kutilmoqda'];
@@ -210,7 +233,7 @@ export function AppProvider({ children }) {
   };
 
   const deleteAppointment = (id) => {
-    setAppointments(appointments.filter(a => a.id !== id));
+    setMyAppointments(prev => prev.filter(a => a.id !== id));
     api.apiDeleteAppointment(id).catch(() => {});
   };
 
@@ -244,18 +267,16 @@ export function AppProvider({ children }) {
     totalDoctors: doctors.length,
     activeDoctors: doctors.filter(d => d.status === 'FAOL').length,
     inactiveDoctors: doctors.filter(d => d.status === 'NOFAOL').length,
-    totalAppointments: appointments.length,
-    todayAppointments: appointments.filter(a => a.status === 'Tasdiqlangan').length,
   });
 
   const value = {
     doctors, setDoctors, addDoctor, updateDoctor, deleteDoctor,
-    appointments, setAppointments, addAppointment, updateAppointment, deleteAppointment,
+    appointments: myAppointments, setAppointments: setMyAppointments, addAppointment, updateAppointment, deleteAppointment,
     clinicSettings, updateClinicSettings,
     lastBooking: getLastBooking(), setLastBooking: setLastBookingForUser,
     categories, addCategory: doAddCategory, removeCategory: doRemoveCategory,
     getStatistics,
-    currentUser, setCurrentUser, registerUser, updateCurrentUser, allUsers,
+    currentUser, setCurrentUser, registerUser, loginUser, updateCurrentUser, logoutUser, allUsers, setAllUsers,
     adminNotifications, addAdminNotification, clearAdminNotification, markAllAdminRead,
     userNotifications, addUserNotification, clearUserNotification, markUserNotificationRead,
     markAllUserNotificationsRead, clearAllUserNotifications,

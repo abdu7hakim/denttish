@@ -7,7 +7,7 @@ import BottomNav from '../components/BottomNav'
 
 export default function ProfilePage() {
   const navigate = useNavigate()
-  const { currentUser, updateCurrentUser, appointments } = useAppContext()
+  const { currentUser, updateCurrentUser, appointments, logoutUser } = useAppContext()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(currentUser?.name || '')
   const [phone, setPhone] = useState(currentUser?.phone || '')
@@ -128,8 +128,7 @@ export default function ProfilePage() {
         <div className="px-4 mt-4">
           <button
             onClick={() => {
-              localStorage.removeItem('denttish_currentUser')
-              window.location.reload()
+              logoutUser()
             }}
             className="w-full bg-white p-4 rounded-xl flex items-center gap-3 hover:bg-red-50 text-red-600 shadow-sm"
           >
