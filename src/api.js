@@ -10,63 +10,57 @@ export function setAdminToken(token) {
 
 export function getAdminToken() { return adminToken; }
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
 async function req(method, path, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
   if (body) opts.body = JSON.stringify(body);
   if (adminToken) opts.headers['Authorization'] = `Bearer ${adminToken}`;
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const res = await fetch(`${API_BASE}${path}`, opts);
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: res.statusText }));
-        throw new Error(err.error || 'Request failed');
-      }
-      return await res.json();
-    } catch (e) {
-      if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
-        if (attempt === 0) { await sleep(500); continue; }
-        return null;
-      }
-      throw e;
-    }
+  try {
+    const res = await fetch(`${API_BASE}${path}`, opts);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
   }
 }
 
-// Auth
+async function reqAuth(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  if (adminToken) opts.headers['Authorization'] = `Bearer ${adminToken}`;
+  try {
+    const res = await fetch(`${API_BASE}${path}`, opts);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 export const apiRegister = (name, phone) => req('POST', '/auth/register', { name, phone });
 export const apiLogin = (name, phone) => req('POST', '/auth/login', { name, phone });
 export const apiAdminLogin = (username, password) => req('POST', '/auth/admin-login', { username, password });
 
-// Doctors
 export const apiGetDoctors = () => req('GET', '/doctors');
-export const apiAddDoctor = (data) => req('POST', '/doctors', data);
-export const apiUpdateDoctor = (id, data) => req('PUT', `/doctors/${id}`, data);
-export const apiDeleteDoctor = (id) => req('DELETE', `/doctors/${id}`);
+export const apiAddDoctor = (data) => reqAuth('POST', '/doctors', data);
+export const apiUpdateDoctor = (id, data) => reqAuth('PUT', `/doctors/${id}`, data);
+export const apiDeleteDoctor = (id) => reqAuth('DELETE', `/doctors/${id}`);
 
-// Appointments
 export const apiGetAppointments = (phone) => req('GET', `/appointments${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`);
 export const apiAddAppointment = (data) => req('POST', '/appointments', data);
-export const apiUpdateAppointment = (id, data) => req('PUT', `/appointments/${id}`, data);
-export const apiDeleteAppointment = (id) => req('DELETE', `/appointments/${id}`);
+export const apiUpdateAppointment = (id, data) => reqAuth('PUT', `/appointments/${id}`, data);
+export const apiDeleteAppointment = (id) => reqAuth('DELETE', `/appointments/${id}`);
 
-// Users
-export const apiGetUsers = () => req('GET', '/users');
+export const apiGetUsers = () => reqAuth('GET', '/users');
 
-// Notifications
 export const apiGetNotifications = (target) => req('GET', `/notifications?target=${encodeURIComponent(target)}`);
-export const apiMarkRead = (id) => req('POST', '/notifications/mark-read', { id });
-export const apiMarkAllRead = () => req('POST', '/notifications/mark-all-read');
+export const apiMarkRead = (id) => reqAuth('POST', '/notifications/mark-read', { id });
+export const apiMarkAllRead = () => reqAuth('POST', '/notifications/mark-all-read');
 
-// Settings
 export const apiGetSettings = () => req('GET', '/settings');
-export const apiUpdateSettings = (data) => req('PUT', '/settings', data);
+export const apiUpdateSettings = (data) => reqAuth('PUT', '/settings', data);
 
-// Categories
 export const apiGetCategories = () => req('GET', '/categories');
-export const apiAddCategory = (name) => req('POST', '/categories', { name });
-export const apiDeleteCategory = (name) => req('DELETE', `/categories/${encodeURIComponent(name)}`);
+export const apiAddCategory = (name) => reqAuth('POST', '/categories', { name });
+export const apiDeleteCategory = (name) => reqAuth('DELETE', `/categories/${encodeURIComponent(name)}`);
 
-// Statistics
 export const apiGetStatistics = () => req('GET', '/statistics');
