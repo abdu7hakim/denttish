@@ -22,10 +22,48 @@ const defaultClinics = [
   { id: 4, name: 'Bright Smile Clinic', address: 'Mirabad tumani, Qo\'qon ko\'chasi 89-uy, Tashkent', phone: '+998 71 456 78 90', hours: '09:00 - 19:00', services: ['UMUMIY', 'RENTGEN'], image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic4', doctors: 0, status: 'FAOL', rating: 4.6, reviews: 156, distance: 4.2 },
 ];
 
+const seedDoctors = [
+  {
+    id: 1, name: 'Dr. Rustam Karimov', phone: '+998 90 123 45 67',
+    specialization: 'Ortodont', subspecialty: 'Bolalar ortodontiyasi',
+    clinic: 'Lumina Dental Hub', experience: '12 yil', patients: '3.5k+',
+    status: 'FAOL', workingHours: '09:00 - 17:00',
+    workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
+    avatar: 'RK', avatarBg: 'bg-blue-500', verified: true,
+    rating: 4.9, reviews: 120, distance: 2.5,
+    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Rustam',
+  },
+  {
+    id: 2, name: 'Dr. Nilufar Azimova', phone: '+998 93 987 65 43',
+    specialization: 'Terapevt', subspecialty: 'Estetik stomatologiya',
+    clinic: 'DentTish Premium Clinic', experience: '8 yil', patients: '2.1k+',
+    status: 'FAOL', workingHours: '10:00 - 18:00',
+    workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Juma', 'Shanba'],
+    avatar: 'NA', avatarBg: 'bg-green-500', verified: true,
+    rating: 4.8, reviews: 95, distance: 1.2,
+    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Nilufar',
+  },
+  {
+    id: 3, name: 'Dr. Jahongir Sobirov', phone: '+998 97 111 22 33',
+    specialization: 'Implantolog', subspecialty: 'Implant va protez',
+    clinic: 'SmileCare Dental Studio', experience: '15 yil', patients: '4.2k+',
+    status: 'FAOL', workingHours: '09:00 - 16:00',
+    workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba'],
+    avatar: 'JS', avatarBg: 'bg-red-500', verified: true,
+    rating: 4.7, reviews: 78, distance: 3.1,
+    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jahongir',
+  },
+];
+
 const loadState = (key, fallback) => {
   try {
     const saved = localStorage.getItem(`denttish_${key}`);
-    return saved ? JSON.parse(saved) : fallback;
+    if (saved) return JSON.parse(saved);
+    if (key === 'doctors' && !saved) {
+      localStorage.setItem('denttish_doctors', JSON.stringify(seedDoctors));
+      return seedDoctors;
+    }
+    return fallback;
   } catch { return fallback; }
 };
 

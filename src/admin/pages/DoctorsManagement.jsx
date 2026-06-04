@@ -27,6 +27,7 @@ export default function DoctorsManagement() {
     phone: '',
     specialization: '',
     subspecialty: '',
+    clinic: '',
     experience: '',
     patients: '',
     image: '',
@@ -35,7 +36,7 @@ export default function DoctorsManagement() {
     workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
   });
 
-  const { doctors, addDoctor, updateDoctor, deleteDoctor } = useAppContext();
+  const { doctors, clinics, addDoctor, updateDoctor, deleteDoctor } = useAppContext();
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -65,6 +66,7 @@ export default function DoctorsManagement() {
         phone: '',
         specialization: '',
         subspecialty: '',
+        clinic: '',
         experience: '',
         patients: '',
         image: '',
@@ -107,6 +109,7 @@ export default function DoctorsManagement() {
                 phone: '',
                 specialization: '',
                 subspecialty: '',
+                clinic: '',
                 experience: '',
                 patients: '',
                 image: '',
@@ -175,6 +178,14 @@ export default function DoctorsManagement() {
                   onChange={(e) => setFormData({...formData, subspecialty: e.target.value})}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                <select
+                  value={formData.clinic}
+                  onChange={(e) => setFormData({...formData, clinic: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Filialni tanlang</option>
+                  {clinics.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                </select>
                 <input
                   type="text"
                   placeholder="Tajriba (masalan: 8 yil)"
