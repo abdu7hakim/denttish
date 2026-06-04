@@ -57,7 +57,6 @@ export default function AdminSidebar({ isOpen, toggleSidebar }) {
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
     setAdminToken(null);
     window.location.href = '/admin/login';
   };
