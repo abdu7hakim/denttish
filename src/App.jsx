@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AppProvider } from './context/AppContext'
-import ProtectedRoute from './admin/utils/auth'
 import HomePage from './pages/HomePage'
 import DoctorPage from './pages/DoctorPage'
 import AIPage from './pages/AIPage'
@@ -13,13 +12,6 @@ import DoctorsPage from './pages/DoctorsPage'
 import BookingPage from './pages/BookingPage'
 import NotificationsPage from './pages/NotificationsPage'
 import SettingsPage from './pages/SettingsPage'
-import AdminLogin from './admin/pages/AdminLogin'
-import AdminDashboard from './admin/pages/AdminDashboard'
-import DoctorsManagement from './admin/pages/DoctorsManagement'
-import AppointmentsManagement from './admin/pages/AppointmentsManagement'
-import AdminSettings from './admin/pages/AdminSettings'
-import CategoriesManagement from './admin/pages/CategoriesManagement'
-import UserManagement from './admin/pages/UserManagement'
 
 function App() {
   return (
@@ -38,15 +30,6 @@ function App() {
           <Route path="/booking/:doctorId" element={<BookingPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/doctors" element={<ProtectedRoute><DoctorsManagement /></ProtectedRoute>} />
-          <Route path="/admin/appointments" element={<ProtectedRoute><AppointmentsManagement /></ProtectedRoute>} />
-          <Route path="/admin/categories" element={<ProtectedRoute><CategoriesManagement /></ProtectedRoute>} />
-          <Route path="/admin/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
-          <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
         </Routes>
       </Router>
     </AppProvider>
