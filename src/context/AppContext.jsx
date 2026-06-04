@@ -1,92 +1,101 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import * as api from '../api';
 
 const AppContext = createContext();
 
 const defaultSettings = {
-  clinicName: 'DentTish Klinika',
-  email: 'admin@denttish.uz',
-  phone: '+998 71 200 00 00',
-  address: 'Tashkent, Yunusobod tumani',
-  workingHoursStart: '09:00',
-  workingHoursEnd: '18:00',
-  notificationsEmail: true,
-  notificationsSms: true,
-  notificationsPush: true,
-  twoFactorAuth: false,
+  clinicName: 'DentTish Klinika', email: 'admin@denttish.uz', phone: '+998 71 200 00 00',
+  address: 'Tashkent, Yunusobod tumani', workingHoursStart: '09:00', workingHoursEnd: '18:00',
+  notificationsEmail: true, notificationsSms: true, notificationsPush: true, twoFactorAuth: false,
 };
 
 const CLINIC_NAME = 'DentTish Klinika';
 
 const seedDoctors = [
-  {
-    id: 1, name: 'Dr. Rustam Karimov', phone: '+998 90 123 45 67',
-    specialization: 'Ortodont', subspecialty: 'Bolalar ortodontiyasi',
-    clinic: CLINIC_NAME, experience: '12 yil', patients: '3.5k+',
-    status: 'FAOL', workingHours: '09:00 - 17:00',
-    workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
-    avatar: 'RK', avatarBg: 'bg-blue-500', verified: true,
-    rating: 4.9, reviews: 120, distance: 2.5,
-    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Rustam',
-  },
-  {
-    id: 2, name: 'Dr. Nilufar Azimova', phone: '+998 93 987 65 43',
-    specialization: 'Terapevt', subspecialty: 'Estetik stomatologiya',
-    clinic: CLINIC_NAME, experience: '8 yil', patients: '2.1k+',
-    status: 'FAOL', workingHours: '10:00 - 18:00',
-    workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Juma', 'Shanba'],
-    avatar: 'NA', avatarBg: 'bg-green-500', verified: true,
-    rating: 4.8, reviews: 95, distance: 1.2,
-    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Nilufar',
-  },
-  {
-    id: 3, name: 'Dr. Jahongir Sobirov', phone: '+998 97 111 22 33',
-    specialization: 'Implantolog', subspecialty: 'Implant va protez',
-    clinic: CLINIC_NAME, experience: '15 yil', patients: '4.2k+',
-    status: 'FAOL', workingHours: '09:00 - 16:00',
-    workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba'],
-    avatar: 'JS', avatarBg: 'bg-red-500', verified: true,
-    rating: 4.7, reviews: 78, distance: 3.1,
-    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jahongir',
-  },
+  { id: 1, name: 'Dr. Rustam Karimov', phone: '+998 90 123 45 67', specialization: 'Ortodont', subspecialty: 'Bolalar ortodontiyasi', clinic: CLINIC_NAME, experience: '12 yil', patients: '3.5k+', status: 'FAOL', workingHours: '09:00 - 17:00', workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'], avatar: 'RK', avatarBg: 'bg-blue-500', verified: true, rating: 4.9, reviews: 120, distance: 2.5, image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Rustam' },
+  { id: 2, name: 'Dr. Nilufar Azimova', phone: '+998 93 987 65 43', specialization: 'Terapevt', subspecialty: 'Estetik stomatologiya', clinic: CLINIC_NAME, experience: '8 yil', patients: '2.1k+', status: 'FAOL', workingHours: '10:00 - 18:00', workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Juma', 'Shanba'], avatar: 'NA', avatarBg: 'bg-green-500', verified: true, rating: 4.8, reviews: 95, distance: 1.2, image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Nilufar' },
+  { id: 3, name: 'Dr. Jahongir Sobirov', phone: '+998 97 111 22 33', specialization: 'Implantolog', subspecialty: 'Implant va protez', clinic: CLINIC_NAME, experience: '15 yil', patients: '4.2k+', status: 'FAOL', workingHours: '09:00 - 16:00', workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba'], avatar: 'JS', avatarBg: 'bg-red-500', verified: true, rating: 4.7, reviews: 78, distance: 3.1, image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jahongir' },
 ];
 
-const loadState = (key, fallback) => {
+function loadLocal(key, fallback) {
   try {
     const saved = localStorage.getItem(`denttish_${key}`);
     if (saved) return JSON.parse(saved);
-    if (key === 'doctors' && !saved) {
-      localStorage.setItem('denttish_doctors', JSON.stringify(seedDoctors));
-      return seedDoctors;
-    }
     return fallback;
   } catch { return fallback; }
-};
+}
+
+function saveLocal(key, data) {
+  try { localStorage.setItem(`denttish_${key}`, JSON.stringify(data)); } catch {}
+}
 
 export function AppProvider({ children }) {
-  const [doctors, setDoctors] = useState(() => loadState('doctors', []));
-  const [appointments, setAppointments] = useState(() => loadState('appointments', []));
-  const [clinicSettings, setClinicSettings] = useState(() => loadState('settings', defaultSettings));
-  const [lastBooking, setLastBooking] = useState(null);
-  const [extraCategories, setExtraCategories] = useState(() => loadState('extraCategories', []));
-  const [currentUser, setCurrentUser] = useState(() => loadState('currentUser', null));
-  const [allUsers, setAllUsers] = useState(() => loadState('allUsers', []));
-  const [adminNotifications, setAdminNotifications] = useState(() => loadState('adminNotifications', []));
-  const [userNotifications, setUserNotifications] = useState(() => {
-    const all = loadState('userNotifications', []);
-    const cutoff = Date.now() - 86400000;
-    const fresh = all.filter(n => new Date(n.time).getTime() > cutoff);
-    if (fresh.length !== all.length) localStorage.setItem('denttish_userNotifications', JSON.stringify(fresh));
-    return fresh.slice(0, 20);
+  const [doctors, setDoctors] = useState(() => loadLocal('doctors', seedDoctors));
+  const [appointments, setAppointments] = useState(() => loadLocal('appointments', []));
+  const [clinicSettings, setClinicSettings] = useState(() => loadLocal('settings', defaultSettings));
+  const [lastBooking, setLastBooking] = useState(() => {
+    const saved = loadLocal('lastBooking', {});
+    return saved;
   });
 
-  useEffect(() => { localStorage.setItem('denttish_doctors', JSON.stringify(doctors)) }, [doctors]);
-  useEffect(() => { localStorage.setItem('denttish_appointments', JSON.stringify(appointments)) }, [appointments]);
-  useEffect(() => { localStorage.setItem('denttish_settings', JSON.stringify(clinicSettings)) }, [clinicSettings]);
-  useEffect(() => { localStorage.setItem('denttish_extraCategories', JSON.stringify(extraCategories)) }, [extraCategories]);
-  useEffect(() => { localStorage.setItem('denttish_currentUser', JSON.stringify(currentUser)) }, [currentUser]);
-  useEffect(() => { localStorage.setItem('denttish_allUsers', JSON.stringify(allUsers)) }, [allUsers]);
-  useEffect(() => { localStorage.setItem('denttish_adminNotifications', JSON.stringify(adminNotifications)) }, [adminNotifications]);
-  useEffect(() => { localStorage.setItem('denttish_userNotifications', JSON.stringify(userNotifications)) }, [userNotifications]);
+  const getLastBooking = useCallback(() => {
+    if (!currentUser?.phone) return null;
+    return lastBooking?.[currentUser.phone] || null;
+  }, [lastBooking, currentUser?.phone]);
+
+  const setLastBookingForUser = useCallback((booking) => {
+    if (!currentUser?.phone) return;
+    setLastBooking(prev => {
+      const updated = { ...prev, [currentUser.phone]: booking };
+      saveLocal('lastBooking', updated);
+      return updated;
+    });
+  }, [currentUser?.phone]);
+  const [extraCategories, setExtraCategories] = useState(() => loadLocal('extraCategories', []));
+  const [currentUser, setCurrentUser] = useState(() => loadLocal('currentUser', null));
+  const [allUsers, setAllUsers] = useState(() => loadLocal('allUsers', []));
+  const [adminNotifications, setAdminNotifications] = useState(() => loadLocal('adminNotifications', []));
+  const [userNotifications, setUserNotifications] = useState([]);
+
+  const loadUserNotifications = useCallback((phone) => {
+    const all = loadLocal(`userNotifications_${phone}`, []);
+    const cutoff = Date.now() - 86400000;
+    const fresh = all.filter(n => new Date(n.time).getTime() > cutoff);
+    setUserNotifications(fresh.slice(0, 20));
+  }, []);
+
+  // Sync from API on mount
+  useEffect(() => {
+    api.apiGetDoctors().then(data => { if (data) { setDoctors(data); saveLocal('doctors', data); } });
+    api.apiGetAppointments().then(data => { if (data) { setAppointments(data); saveLocal('appointments', data); } });
+    api.apiGetUsers().then(data => { if (data) { setAllUsers(data); saveLocal('allUsers', data); } });
+    api.apiGetSettings().then(data => { if (data) { setClinicSettings(data); saveLocal('settings', data); } });
+    api.apiGetNotifications('admin').then(data => { if (data) { setAdminNotifications(data); saveLocal('adminNotifications', data); } });
+  }, []);
+
+  // Persist to localStorage on change
+  useEffect(() => { saveLocal('doctors', doctors); }, [doctors]);
+  useEffect(() => { saveLocal('appointments', appointments); }, [appointments]);
+  useEffect(() => { saveLocal('settings', clinicSettings); }, [clinicSettings]);
+  useEffect(() => { saveLocal('extraCategories', extraCategories); }, [extraCategories]);
+  useEffect(() => { saveLocal('currentUser', currentUser); }, [currentUser]);
+  useEffect(() => { saveLocal('allUsers', allUsers); }, [allUsers]);
+  useEffect(() => { saveLocal('adminNotifications', adminNotifications); }, [adminNotifications]);
+  useEffect(() => {
+    if (currentUser?.phone) saveLocal(`userNotifications_${currentUser.phone}`, userNotifications);
+  }, [userNotifications, currentUser?.phone]);
+
+  // Sync user notifications from API when user changes
+  useEffect(() => {
+    if (currentUser?.phone) {
+      loadUserNotifications(currentUser.phone);
+      api.apiGetNotifications(currentUser.phone).then(data => {
+        if (data) { setUserNotifications(data); saveLocal(`userNotifications_${currentUser.phone}`, data); }
+      });
+    } else {
+      setUserNotifications([]);
+    }
+  }, [currentUser?.phone, loadUserNotifications]);
 
   // Notifications
   const addAdminNotification = useCallback((message, type = 'info') => {
@@ -96,10 +105,12 @@ export function AppProvider({ children }) {
 
   const clearAdminNotification = useCallback((id) => {
     setAdminNotifications(prev => prev.filter(n => n.id !== id));
+    api.apiMarkRead(id);
   }, []);
 
   const markAllAdminRead = useCallback(() => {
     setAdminNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    api.apiMarkAllRead();
   }, []);
 
   const addUserNotification = useCallback((message, type = 'info') => {
@@ -109,10 +120,12 @@ export function AppProvider({ children }) {
 
   const clearUserNotification = useCallback((id) => {
     setUserNotifications(prev => prev.filter(n => n.id !== id));
+    api.apiMarkRead(id);
   }, []);
 
   const markUserNotificationRead = useCallback((id) => {
     setUserNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    api.apiMarkRead(id);
   }, []);
 
   const markAllUserNotificationsRead = useCallback(() => {
@@ -121,95 +134,79 @@ export function AppProvider({ children }) {
 
   const clearAllUserNotifications = useCallback(() => {
     setUserNotifications([]);
-    localStorage.setItem('denttish_userNotifications', '[]');
+    saveLocal('userNotifications', []);
   }, []);
 
   // User registration
-  const registerUser = useCallback((name, phone) => {
+  const registerUser = useCallback(async (name, phone) => {
     const user = { name, phone, registeredAt: new Date().toISOString() };
     setCurrentUser(user);
     setAllUsers(prev => {
-      if (prev.some(u => u.name === name && u.phone === phone)) return prev;
-      addAdminNotification(`Yangi foydalanuvchi ro'yxatdan o'tdi: ${name} (${phone})`, 'user_register');
+      if (prev.some(u => u.phone === phone)) return prev;
       return [...prev, user];
     });
     addUserNotification(`Xush kelibsiz, ${name}! DentTish ilovasiga muvaffaqiyatli ro'yxatdan o'tdingiz.`, 'welcome');
-  }, [addUserNotification, addAdminNotification]);
+    const result = await api.apiRegister(name, phone);
+    if (result?.user) {
+      setCurrentUser(result.user);
+      setAllUsers(prev => {
+        if (prev.some(u => u.phone === phone)) return prev;
+        return [...prev, result.user];
+      });
+    }
+  }, [addUserNotification]);
 
   const updateCurrentUser = useCallback((name, phone) => {
-    setCurrentUser(prev => {
-      const updated = { ...prev, name, phone };
-      return updated;
-    });
+    setCurrentUser(prev => ({ ...prev, name, phone }));
     setAllUsers(prev => prev.map(u =>
-      u.name === currentUser?.name && u.phone === currentUser?.phone
-        ? { ...u, name, phone }
-        : u
+      u.phone === currentUser?.phone ? { ...u, name, phone } : u
     ));
   }, [currentUser]);
 
-  // Doctor CRUD (with notifications)
+  // Doctor CRUD
   const addDoctor = (doctor) => {
     const id = doctors.length > 0 ? Math.max(...doctors.map(d => d.id)) + 1 : 1;
     const initials = doctor.name.replace('Dr. ', '').split(' ').map(n => n[0]).join('').toUpperCase();
     const bgColors = ['bg-blue-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-teal-500', 'bg-indigo-500', 'bg-pink-500', 'bg-orange-500'];
-    const avatarBg = bgColors[id % bgColors.length];
     const newDoctor = {
-      ...doctor, id, avatar: initials, avatarBg,
-      rating: parseFloat((4 + Math.random()).toFixed(1)),
-      reviews: Math.floor(Math.random() * 200) + 20,
-      patients: `${Math.floor(Math.random() * 5) + 1}.${Math.floor(Math.random() * 10)}k+`,
-      distance: parseFloat((Math.random() * 5 + 0.5).toFixed(1)),
-      verified: true,
-      subspecialty: doctor.subspecialty || '',
-      phone: doctor.phone || '',
+      ...doctor, id, avatar: initials, avatarBg: bgColors[id % bgColors.length],
+      rating: parseFloat((4 + Math.random()).toFixed(1)), reviews: Math.floor(Math.random() * 200) + 20,
+      patients: `${Math.floor(Math.random() * 5) + 1}.${Math.floor(Math.random() * 10)}k+`, verified: true,
+      subspecialty: doctor.subspecialty || '', phone: doctor.phone || '',
       workingDays: doctor.workingDays || ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
       workingHours: doctor.workingHours || '09:00 - 18:00',
     };
     setDoctors([...doctors, newDoctor]);
     addAdminNotification(`Yangi shifokor qo'shildi: ${newDoctor.name}`, 'doctor_add');
+    api.apiAddDoctor(newDoctor).then(data => { if (data) setDoctors(prev => prev.map(d => d.id === data.id ? data : d)); });
   };
 
   const updateDoctor = (id, updatedData) => {
     setDoctors(doctors.map(d => d.id === id ? { ...d, ...updatedData } : d));
+    api.apiUpdateDoctor(id, updatedData);
   };
 
   const deleteDoctor = (id) => {
     const doc = doctors.find(d => d.id === id);
-    if (doc) {
-      addAdminNotification(`Shifokor ishdan olindi: ${doc.name}`, 'doctor_remove');
-    }
+    if (doc) addAdminNotification(`Shifokor ishdan olindi: ${doc.name}`, 'doctor_remove');
     setDoctors(doctors.filter(d => d.id !== id));
+    api.apiDeleteDoctor(id);
   };
 
-  // Appointment CRUD (with user notification)
+  // Appointment CRUD
   const addAppointment = (appointment) => {
     const id = appointments.length > 0 ? Math.max(...appointments.map(a => a.id)) + 1 : 1;
-    const statusColors = {
-      'Tasdiqlangan': 'bg-green-100 text-green-800',
-      'Kutilmoqda': 'bg-yellow-100 text-yellow-800',
-      'Yakunlandi': 'bg-blue-100 text-blue-800',
-      'Bekor qilindi': 'bg-red-100 text-red-800',
-    };
-    const newAppointment = {
-      ...appointment, id,
-      initials: appointment.patient.split(' ').map(n => n[0]).join('').toUpperCase(),
-      phone: appointment.phone || '',
-      statusColor: statusColors[appointment.status] || statusColors['Kutilmoqda'],
-    };
+    const statusColors = { 'Tasdiqlangan': 'bg-green-100 text-green-800', 'Kutilmoqda': 'bg-yellow-100 text-yellow-800', 'Yakunlandi': 'bg-blue-100 text-blue-800', 'Bekor qilindi': 'bg-red-100 text-red-800' };
+    const newAppointment = { ...appointment, id, initials: appointment.patient.split(' ').map(n => n[0]).join('').toUpperCase(), phone: appointment.phone || '', statusColor: statusColors[appointment.status] || statusColors['Kutilmoqda'] };
     setAppointments([...appointments, newAppointment]);
-    setLastBooking(newAppointment);
+    setLastBookingForUser(newAppointment);
     addUserNotification(`Siz ${appointment.doctor} qabuliga yozildingiz (${appointment.date}, ${appointment.time})`, 'booking');
     addAdminNotification(`${appointment.patient} → ${appointment.doctor} (${appointment.date}, ${appointment.time})`, 'booking');
+    api.apiAddAppointment(newAppointment).then(data => { if (data) setAppointments(prev => prev.map(a => a.id === data.id ? data : a)); });
   };
 
   const updateAppointment = (id, updatedData) => {
-    const statusColors = {
-      'Tasdiqlangan': 'bg-green-100 text-green-800',
-      'Kutilmoqda': 'bg-yellow-100 text-yellow-800',
-      'Yakunlandi': 'bg-blue-100 text-blue-800',
-      'Bekor qilindi': 'bg-red-100 text-red-800',
-    };
+    const statusColors = { 'Tasdiqlangan': 'bg-green-100 text-green-800', 'Kutilmoqda': 'bg-yellow-100 text-yellow-800', 'Yakunlandi': 'bg-blue-100 text-blue-800', 'Bekor qilindi': 'bg-red-100 text-red-800' };
     setAppointments(appointments.map(a => {
       if (a.id === id) {
         const updated = { ...a, ...updatedData };
@@ -218,14 +215,17 @@ export function AppProvider({ children }) {
       }
       return a;
     }));
+    api.apiUpdateAppointment(id, updatedData);
   };
 
   const deleteAppointment = (id) => {
     setAppointments(appointments.filter(a => a.id !== id));
+    api.apiDeleteAppointment(id);
   };
 
   const updateClinicSettings = (settings) => {
     setClinicSettings({ ...clinicSettings, ...settings });
+    api.apiUpdateSettings({ ...clinicSettings, ...settings });
   };
 
   // Categories
@@ -237,6 +237,7 @@ export function AppProvider({ children }) {
   const doAddCategory = (name) => {
     if (name && !categories.includes(name)) {
       setExtraCategories([...extraCategories, name]);
+      api.apiAddCategory(name);
     }
   };
 
@@ -244,6 +245,7 @@ export function AppProvider({ children }) {
     const hasDoctor = doctors.some(d => d.specialization === name);
     if (!hasDoctor) {
       setExtraCategories(extraCategories.filter(c => c !== name));
+      api.apiDeleteCategory(name);
     }
   };
 
@@ -259,12 +261,10 @@ export function AppProvider({ children }) {
     doctors, setDoctors, addDoctor, updateDoctor, deleteDoctor,
     appointments, setAppointments, addAppointment, updateAppointment, deleteAppointment,
     clinicSettings, updateClinicSettings,
-    lastBooking, setLastBooking,
+    lastBooking: getLastBooking(), setLastBooking: setLastBookingForUser,
     categories, addCategory: doAddCategory, removeCategory: doRemoveCategory,
     getStatistics,
-    // User system
     currentUser, setCurrentUser, registerUser, updateCurrentUser, allUsers,
-    // Notifications
     adminNotifications, addAdminNotification, clearAdminNotification, markAllAdminRead,
     userNotifications, addUserNotification, clearUserNotification, markUserNotificationRead,
     markAllUserNotificationsRead, clearAllUserNotifications,

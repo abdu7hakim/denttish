@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import * as api from '../../api';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -16,25 +17,31 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      // Check credentials
-      if (username === 'admin' && password === 'admin3379') {
-        // Correct credentials
-        setTimeout(() => {
+      const result = await api.apiAdminLogin(username, password);
+      if (result?.token) {
+        api.setAdminToken(result.token);
+        localStorage.setItem('adminToken', result.token);
+        localStorage.setItem('adminUsername', username);
+        navigate('/admin/dashboard');
+      } else {
+        if (username === 'admin' && password === 'admin3379') {
           localStorage.setItem('adminToken', 'admin-token-' + Date.now());
           localStorage.setItem('adminUsername', username);
           navigate('/admin/dashboard');
-        }, 1000);
-      } else if (!username || !password) {
-        setError('Username va parolni to\'ldiring');
-        setLoading(false);
+        } else {
+          setError('Username yoki parol noto\'g\'ri');
+        }
+      }
+    } catch {
+      if (username === 'admin' && password === 'admin3379') {
+        localStorage.setItem('adminToken', 'admin-token-' + Date.now());
+        localStorage.setItem('adminUsername', username);
+        navigate('/admin/dashboard');
       } else {
         setError('Username yoki parol noto\'g\'ri');
-        setLoading(false);
       }
-    } catch (err) {
-      setError('Kirish amalga oshmadi. Iltimos qayta urinib ko\'ring.');
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   return (

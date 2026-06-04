@@ -10,6 +10,7 @@ import {
   X,
   Stethoscope,
 } from 'lucide-react';
+import { setAdminToken } from '../../api';
 
 export default function AdminSidebar({ isOpen, toggleSidebar }) {
   const location = useLocation();
@@ -57,6 +58,7 @@ export default function AdminSidebar({ isOpen, toggleSidebar }) {
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
+    setAdminToken(null);
     window.location.href = '/admin/login';
   };
 
