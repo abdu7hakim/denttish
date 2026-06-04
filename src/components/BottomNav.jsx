@@ -1,9 +1,12 @@
 import { Home, Clock, Box, User, Bell } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useAppContext } from '../context/AppContext'
 
 export default function BottomNav() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { userNotifications } = useAppContext()
+  const unreadCount = userNotifications.filter(n => !n.read).length
 
   const isActive = (path) => location.pathname === path
 
@@ -36,7 +39,9 @@ export default function BottomNav() {
       >
         <Bell size={24} />
         <span className="text-xs">Xabarlar</span>
-        <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+        {unreadCount > 0 && (
+          <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+        )}
       </button>
       <button
         onClick={() => navigate('/profile')}

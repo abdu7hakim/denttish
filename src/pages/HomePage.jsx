@@ -7,7 +7,7 @@ import BottomNav from '../components/BottomNav'
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const { doctors, clinics, appointments, clinicSettings, categories, currentUser } = useAppContext()
+  const { doctors, appointments, clinicSettings, categories, currentUser } = useAppContext()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState(null)
 
@@ -23,7 +23,6 @@ export default function HomePage() {
     ? searched.filter(d => d.specialization === selectedCategory)
     : searched
 
-  const mainClinic = clinics[0] || clinicSettings
   const upcoming = appointments.find(a => a.status === 'Kutilmoqda' || a.status === 'Tasdiqlangan')
 
   return (
@@ -38,13 +37,13 @@ export default function HomePage() {
               <MapPin size={20} />
             </div>
             <div>
-              <h1 className="text-xl font-bold">{mainClinic?.name || clinicSettings.clinicName}</h1>
-              <p className="text-sm text-blue-100">{mainClinic?.address || clinicSettings.address}</p>
+              <h1 className="text-xl font-bold">{clinicSettings.clinicName}</h1>
+              <p className="text-sm text-blue-100">{clinicSettings.address}</p>
             </div>
           </div>
           <div className="flex gap-4 text-sm text-blue-100 ml-11">
-            <span className="flex items-center gap-1"><Phone size={14} /> {mainClinic?.phone || clinicSettings.phone}</span>
-            <span className="flex items-center gap-1"><Clock size={14} /> {mainClinic?.hours || `${clinicSettings.workingHoursStart} - ${clinicSettings.workingHoursEnd}`}</span>
+            <span className="flex items-center gap-1"><Phone size={14} /> {clinicSettings.phone}</span>
+            <span className="flex items-center gap-1"><Clock size={14} /> {clinicSettings.workingHoursStart} - {clinicSettings.workingHoursEnd}</span>
           </div>
         </div>
 
@@ -169,24 +168,6 @@ export default function HomePage() {
             </div>
           )}
         </div>
-
-        {/* Branches */}
-        {clinics.length > 1 && (
-          <div className="px-4 mt-5">
-            <h2 className="text-lg font-bold mb-3">Filiallar</h2>
-            <div className="space-y-2">
-              {clinics.map(c => (
-                <div key={c.id} className="bg-white rounded-xl p-3 flex items-center gap-3 shadow-sm border border-gray-100">
-                  <MapPin size={18} className="text-primary flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-sm">{c.name}</p>
-                    <p className="text-xs text-gray-500">{c.address}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       <BottomNav />

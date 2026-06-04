@@ -15,18 +15,13 @@ const defaultSettings = {
   twoFactorAuth: false,
 };
 
-const defaultClinics = [
-  { id: 1, name: 'Lumina Dental Hub', address: 'Amir Temur ko\'chasi 45-uy, Tashkent', phone: '+998 71 123 45 67', hours: '09:00 - 21:00', services: ['UMUMIY', 'RENTGEN', 'IMPLANT'], image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic1', doctors: 0, status: 'FAOL', rating: 4.8, reviews: 245, distance: 1.2 },
-  { id: 2, name: 'DentTish Premium Clinic', address: 'Navoi ko\'chasi 12-uy, Tashkent', phone: '+998 71 234 56 78', hours: '08:00 - 22:00', services: ['UMUMIY', 'ORTODONTIYA', 'KOSMETIK'], image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic2', doctors: 0, status: 'FAOL', rating: 4.9, reviews: 312, distance: 2.5 },
-  { id: 3, name: 'SmileCare Dental Studio', address: 'Buyuk Ipak yo\'li 56-uy, Tashkent', phone: '+998 71 345 67 89', hours: '10:00 - 20:00', services: ['UMUMIY', 'PROTEZ', 'ENDODONTIYA'], image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic3', doctors: 0, status: 'FAOL', rating: 4.7, reviews: 189, distance: 3.1 },
-  { id: 4, name: 'Bright Smile Clinic', address: 'Mirabad tumani, Qo\'qon ko\'chasi 89-uy, Tashkent', phone: '+998 71 456 78 90', hours: '09:00 - 19:00', services: ['UMUMIY', 'RENTGEN'], image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic4', doctors: 0, status: 'FAOL', rating: 4.6, reviews: 156, distance: 4.2 },
-];
+const CLINIC_NAME = 'DentTish Klinika';
 
 const seedDoctors = [
   {
     id: 1, name: 'Dr. Rustam Karimov', phone: '+998 90 123 45 67',
     specialization: 'Ortodont', subspecialty: 'Bolalar ortodontiyasi',
-    clinic: 'Lumina Dental Hub', experience: '12 yil', patients: '3.5k+',
+    clinic: CLINIC_NAME, experience: '12 yil', patients: '3.5k+',
     status: 'FAOL', workingHours: '09:00 - 17:00',
     workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
     avatar: 'RK', avatarBg: 'bg-blue-500', verified: true,
@@ -36,7 +31,7 @@ const seedDoctors = [
   {
     id: 2, name: 'Dr. Nilufar Azimova', phone: '+998 93 987 65 43',
     specialization: 'Terapevt', subspecialty: 'Estetik stomatologiya',
-    clinic: 'DentTish Premium Clinic', experience: '8 yil', patients: '2.1k+',
+    clinic: CLINIC_NAME, experience: '8 yil', patients: '2.1k+',
     status: 'FAOL', workingHours: '10:00 - 18:00',
     workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Juma', 'Shanba'],
     avatar: 'NA', avatarBg: 'bg-green-500', verified: true,
@@ -46,7 +41,7 @@ const seedDoctors = [
   {
     id: 3, name: 'Dr. Jahongir Sobirov', phone: '+998 97 111 22 33',
     specialization: 'Implantolog', subspecialty: 'Implant va protez',
-    clinic: 'SmileCare Dental Studio', experience: '15 yil', patients: '4.2k+',
+    clinic: CLINIC_NAME, experience: '15 yil', patients: '4.2k+',
     status: 'FAOL', workingHours: '09:00 - 16:00',
     workingDays: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba'],
     avatar: 'JS', avatarBg: 'bg-red-500', verified: true,
@@ -70,7 +65,6 @@ const loadState = (key, fallback) => {
 export function AppProvider({ children }) {
   const [doctors, setDoctors] = useState(() => loadState('doctors', []));
   const [appointments, setAppointments] = useState(() => loadState('appointments', []));
-  const [clinics, setClinics] = useState(() => loadState('clinics', defaultClinics));
   const [clinicSettings, setClinicSettings] = useState(() => loadState('settings', defaultSettings));
   const [lastBooking, setLastBooking] = useState(null);
   const [extraCategories, setExtraCategories] = useState(() => loadState('extraCategories', []));
@@ -87,7 +81,6 @@ export function AppProvider({ children }) {
 
   useEffect(() => { localStorage.setItem('denttish_doctors', JSON.stringify(doctors)) }, [doctors]);
   useEffect(() => { localStorage.setItem('denttish_appointments', JSON.stringify(appointments)) }, [appointments]);
-  useEffect(() => { localStorage.setItem('denttish_clinics', JSON.stringify(clinics)) }, [clinics]);
   useEffect(() => { localStorage.setItem('denttish_settings', JSON.stringify(clinicSettings)) }, [clinicSettings]);
   useEffect(() => { localStorage.setItem('denttish_extraCategories', JSON.stringify(extraCategories)) }, [extraCategories]);
   useEffect(() => { localStorage.setItem('denttish_currentUser', JSON.stringify(currentUser)) }, [currentUser]);
@@ -230,21 +223,6 @@ export function AppProvider({ children }) {
     setAppointments(appointments.filter(a => a.id !== id));
   };
 
-  // Clinic CRUD
-  const addClinic = (clinic) => {
-    const id = clinics.length > 0 ? Math.max(...clinics.map(c => c.id)) + 1 : 1;
-    const newClinic = { ...clinic, id, doctors: 0, rating: 4.5, reviews: 0, image: `https://api.dicebear.com/7.x/shapes/svg?seed=clinic${id}` };
-    setClinics([...clinics, newClinic]);
-  };
-
-  const updateClinic = (id, updatedData) => {
-    setClinics(clinics.map(c => c.id === id ? { ...c, ...updatedData } : c));
-  };
-
-  const deleteClinic = (id) => {
-    setClinics(clinics.filter(c => c.id !== id));
-  };
-
   const updateClinicSettings = (settings) => {
     setClinicSettings({ ...clinicSettings, ...settings });
   };
@@ -273,14 +251,12 @@ export function AppProvider({ children }) {
     activeDoctors: doctors.filter(d => d.status === 'FAOL').length,
     inactiveDoctors: doctors.filter(d => d.status === 'NOFAOL').length,
     totalAppointments: appointments.length,
-    totalClinics: clinics.length,
     todayAppointments: appointments.filter(a => a.status === 'Tasdiqlangan').length,
   });
 
   const value = {
     doctors, setDoctors, addDoctor, updateDoctor, deleteDoctor,
     appointments, setAppointments, addAppointment, updateAppointment, deleteAppointment,
-    clinics, setClinics, addClinic, updateClinic, deleteClinic,
     clinicSettings, updateClinicSettings,
     lastBooking, setLastBooking,
     categories, addCategory: doAddCategory, removeCategory: doRemoveCategory,

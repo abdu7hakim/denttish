@@ -7,7 +7,7 @@ import BottomNav from '../components/BottomNav'
 export default function DoctorPage() {
   const navigate = useNavigate()
   const { id } = useParams()
-  const { doctors, clinics, appointments } = useAppContext()
+  const { doctors, appointments } = useAppContext()
   const doctor = doctors.find(d => d.id === parseInt(id))
 
   if (!doctor) {
@@ -18,7 +18,6 @@ export default function DoctorPage() {
     )
   }
 
-  const doctorClinic = clinics.find(c => c.name === doctor.clinic)
   const todayAppointments = appointments.filter(a => a.doctorId === doctor.id && a.status !== 'Bekor qilindi')
 
   return (
@@ -112,7 +111,6 @@ export default function DoctorPage() {
               <MapPin size={18} className="text-primary" /> Manzil
             </h3>
             <p className="text-sm font-semibold text-gray-900">{doctor.clinic}</p>
-            <p className="text-sm text-gray-500">{doctorClinic?.address || 'Toshkent shahri'}</p>
           </div>
         </div>
 
