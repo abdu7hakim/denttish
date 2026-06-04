@@ -130,10 +130,11 @@ export function AppProvider({ children }) {
     setCurrentUser(user);
     setAllUsers(prev => {
       if (prev.some(u => u.name === name && u.phone === phone)) return prev;
+      addAdminNotification(`Yangi foydalanuvchi ro'yxatdan o'tdi: ${name} (${phone})`, 'user_register');
       return [...prev, user];
     });
     addUserNotification(`Xush kelibsiz, ${name}! DentTish ilovasiga muvaffaqiyatli ro'yxatdan o'tdingiz.`, 'welcome');
-  }, [addUserNotification]);
+  }, [addUserNotification, addAdminNotification]);
 
   const updateCurrentUser = useCallback((name, phone) => {
     setCurrentUser(prev => {
@@ -199,7 +200,7 @@ export function AppProvider({ children }) {
     setAppointments([...appointments, newAppointment]);
     setLastBooking(newAppointment);
     addUserNotification(`Siz ${appointment.doctor} qabuliga yozildingiz (${appointment.date}, ${appointment.time})`, 'booking');
-    addAdminNotification(`${appointment.patient} ${appointment.doctor} qabuliga yozildi`, 'booking');
+    addAdminNotification(`${appointment.patient} → ${appointment.doctor} (${appointment.date}, ${appointment.time})`, 'booking');
   };
 
   const updateAppointment = (id, updatedData) => {

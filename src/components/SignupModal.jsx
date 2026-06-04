@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User as UserIcon, Phone, Shield } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
-
-const ADMIN_URL = 'https://admin-denttish.vercel.app';
 
 function normalizePhone(raw) {
   return raw.replace(/\s/g, '');
@@ -21,6 +20,7 @@ function formatPhone(raw) {
 }
 
 export default function SignupModal() {
+  const navigate = useNavigate();
   const { currentUser, registerUser, setCurrentUser, allUsers } = useAppContext();
   const [open, setOpen] = useState(!currentUser);
   const [authMode, setAuthMode] = useState('register');
@@ -64,7 +64,7 @@ export default function SignupModal() {
     setAdminError('');
     if (adminUser === 'admin' && adminPass === 'admin3379') {
       setOpen(false);
-      window.open(ADMIN_URL, '_blank');
+      navigate('/admin/dashboard');
     } else {
       setAdminError('Username yoki parol noto\'g\'ri');
     }

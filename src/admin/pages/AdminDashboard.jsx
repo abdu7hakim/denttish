@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import AdminLayout from '../components/AdminLayout';
 import {
   Users,
@@ -7,36 +7,24 @@ import {
   TrendingUp,
   MoreVertical,
   Edit,
+  Bell,
 } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 
-export default function AdminDashboard() {
-  const { doctors, appointments, getStatistics } = useAppContext();
-  const stats = getStatistics();
+function timeAgo(iso) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return 'Hozir';
+  if (min < 60) return `${min} min oldin`;
+  const hrs = Math.floor(min / 60);
+  if (hrs < 24) return `${hrs} soat oldin`;
+  const days = Math.floor(hrs / 24);
+  return `${days} kun oldin`;
+}
 
-  const [reviews] = useState([
-    {
-      id: 1,
-      patient: 'Aziza T.',
-      comment: 'Uyali shifokor, amaliyot zo\'r!',
-      rating: '5.0/5',
-      time: 'Bugun',
-    },
-    {
-      id: 2,
-      patient: 'Rustam K.',
-      comment: 'Shifokor va jamoasi juda xushmuamala.',
-      rating: '5.0/5',
-      time: 'Kecha',
-    },
-    {
-      id: 3,
-      patient: 'Malika P.',
-      comment: 'Tez va samarali xizmat!',
-      rating: '4.5/5',
-      time: 'Ikkishanba',
-    },
-  ]);
+export default function AdminDashboard() {
+  const { doctors, appointments, getStatistics, adminNotifications, markAllAdminRead } = useAppContext();
+  const stats = getStatistics();
 
   return (
     <AdminLayout adminName="Admin">
@@ -155,10 +143,10 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {appointments.slice(0, 3).map((appointment) => (
+                  {appointments.slice(0, 5).map((appointment) => (
                     <tr
                       key={appointment.id}
-                      className="border-b border-gray-100 hover:bg-gray-50"
+                      className="border-b border-gray-200 hover:bg-gray-50"
                     >
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">
                         {appointment.patient}
@@ -167,7 +155,7 @@ export default function AdminDashboard() {
                         {appointment.doctor}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-700">
-                        {appointment.time}
+                        {appointment.date}<br/><span className="text-xs">{appointment.time}</span>
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <span
@@ -199,43 +187,42 @@ export default function AdminDashboard() {
 
           {/* Reviews Section */}
           <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-800">
-                Bildirrishnomalar
-              </h2>
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Bildirrishnomalar
+                </h2>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {adminNotifications.filter(n => !n.read).length} ta o'qilmagan
+                </p>
+              </div>
+              {adminNotifications.some(n => !n.read) && (
+                <button onClick={markAllAdminRead} className="text-xs text-blue-600 hover:underline">
+                  Hammasini o'qilgan deb belgilash
+                </button>
+              )}
             </div>
 
-            <div className="divide-y divide-gray-200">
-              {reviews.map((review) => (
-                <div key={review.id} className="p-6 hover:bg-gray-50">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full w-fit">
-                      <span className="text-xs font-semibold">
-                        {review.patient}
-                      </span>
-                    </div>
-                    <button className="text-gray-400 hover:text-gray-600">
-                      <MoreVertical size={18} />
-                    </button>
-                  </div>
-                  <p className="text-sm text-gray-700 mb-2">{review.comment}</p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span className="text-yellow-500 font-medium">
-                      {review.rating}
-                    </span>
-                    {review.time && <span>{review.time}</span>}
-                  </div>
+            <div className="divide-y divide-gray-200 max-h-80 overflow-y-auto">
+              {adminNotifications.length === 0 ? (
+                <div className="p-6 text-center text-gray-400 text-sm">
+                  Bildirrishnomalar mavjud emas
                 </div>
-              ))}
-            </div>
-
-            <div className="px-6 py-4 border-t border-gray-200">
-              <a
-                href="#"
-                className="text-blue-600 text-sm font-medium hover:text-blue-700"
-              >
-                Barcha yozuvlarni ko'rish
-              </a>
+              ) : (
+                adminNotifications.slice(0, 10).map((notif) => (
+                  <div key={notif.id} className={`p-4 hover:bg-gray-50 ${!notif.read ? 'bg-blue-50' : ''}`}>
+                    <div className="flex items-start gap-3">
+                      <Bell size={16} className={`mt-0.5 ${!notif.read ? 'text-blue-600' : 'text-gray-400'}`} />
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm ${!notif.read ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>
+                          {notif.message}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">{timeAgo(notif.time)}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
