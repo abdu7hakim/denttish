@@ -5,7 +5,7 @@ import Header from '../components/Header'
 
 export default function AcceptedPage() {
   const navigate = useNavigate()
-  const { lastBooking, doctors } = useAppContext()
+  const { lastBooking, doctors, currentUser } = useAppContext()
   const booking = lastBooking
   const doctor = doctors.find(d => d.id === (booking?.doctorId || 1))
 
@@ -40,24 +40,20 @@ export default function AcceptedPage() {
             </div>
           </div>
 
-          {booking?.patient && (
-            <div className="flex items-center gap-3">
-              <User className="text-primary" size={20} />
-              <div>
-                <p className="text-sm text-gray-600">Bemor</p>
-                <p className="font-bold">{booking.patient}</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <User className="text-primary" size={20} />
+            <div>
+              <p className="text-sm text-gray-600">Bemor</p>
+              <p className="font-bold">{currentUser?.name || booking?.patient || '—'}</p>
             </div>
-          )}
-          {booking?.phone && (
-            <div className="flex items-center gap-3">
-              <Phone className="text-primary" size={20} />
-              <div>
-                <p className="text-sm text-gray-600">Telefon</p>
-                <p className="font-bold">{booking.phone}</p>
-              </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Phone className="text-primary" size={20} />
+            <div>
+              <p className="text-sm text-gray-600">Telefon</p>
+              <p className="font-bold">{currentUser?.phone || booking?.phone || '—'}</p>
             </div>
-          )}
+          </div>
 
           <div className="space-y-3">
             <div className="flex items-center gap-3">

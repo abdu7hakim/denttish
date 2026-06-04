@@ -7,7 +7,7 @@ import BottomNav from '../components/BottomNav'
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const { doctors, clinics, appointments, clinicSettings, categories } = useAppContext()
+  const { doctors, clinics, appointments, clinicSettings, categories, currentUser } = useAppContext()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState(null)
 
@@ -47,6 +47,17 @@ export default function HomePage() {
             <span className="flex items-center gap-1"><Clock size={14} /> {mainClinic?.hours || `${clinicSettings.workingHoursStart} - ${clinicSettings.workingHoursEnd}`}</span>
           </div>
         </div>
+
+        {/* Welcome */}
+        {currentUser && (
+          <div className="mx-4 mt-5">
+            <div className="bg-gradient-to-r from-primary to-blue-600 rounded-xl px-5 py-4 text-white shadow-md">
+              <p className="text-sm text-blue-100">Xush kelibsiz</p>
+              <p className="text-lg font-bold">{currentUser.name} 👋</p>
+              <p className="text-xs text-blue-100 mt-0.5">Bugun sizga qanday yordam bera olamiz?</p>
+            </div>
+          </div>
+        )}
 
         {/* Upcoming Appointment */}
         {upcoming && (

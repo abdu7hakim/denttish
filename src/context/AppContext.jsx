@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 
 const AppContext = createContext();
 
@@ -16,71 +16,17 @@ const defaultSettings = {
 };
 
 const defaultClinics = [
-  {
-    id: 1,
-    name: 'Lumina Dental Hub',
-    address: 'Amir Temur ko\'chasi 45-uy, Tashkent',
-    phone: '+998 71 123 45 67',
-    hours: '09:00 - 21:00',
-    services: ['UMUMIY', 'RENTGEN', 'IMPLANT'],
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic1',
-    doctors: 0,
-    status: 'FAOL',
-    rating: 4.8,
-    reviews: 245,
-    distance: 1.2,
-  },
-  {
-    id: 2,
-    name: 'DentTish Premium Clinic',
-    address: 'Navoi ko\'chasi 12-uy, Tashkent',
-    phone: '+998 71 234 56 78',
-    hours: '08:00 - 22:00',
-    services: ['UMUMIY', 'ORTODONTIYA', 'KOSMETIK'],
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic2',
-    doctors: 0,
-    status: 'FAOL',
-    rating: 4.9,
-    reviews: 312,
-    distance: 2.5,
-  },
-  {
-    id: 3,
-    name: 'SmileCare Dental Studio',
-    address: 'Buyuk Ipak yo\'li 56-uy, Tashkent',
-    phone: '+998 71 345 67 89',
-    hours: '10:00 - 20:00',
-    services: ['UMUMIY', 'PROTEZ', 'ENDODONTIYA'],
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic3',
-    doctors: 0,
-    status: 'FAOL',
-    rating: 4.7,
-    reviews: 189,
-    distance: 3.1,
-  },
-  {
-    id: 4,
-    name: 'Bright Smile Clinic',
-    address: 'Mirabad tumani, Qo\'qon ko\'chasi 89-uy, Tashkent',
-    phone: '+998 71 456 78 90',
-    hours: '09:00 - 19:00',
-    services: ['UMUMIY', 'RENTGEN'],
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic4',
-    doctors: 0,
-    status: 'FAOL',
-    rating: 4.6,
-    reviews: 156,
-    distance: 4.2,
-  },
+  { id: 1, name: 'Lumina Dental Hub', address: 'Amir Temur ko\'chasi 45-uy, Tashkent', phone: '+998 71 123 45 67', hours: '09:00 - 21:00', services: ['UMUMIY', 'RENTGEN', 'IMPLANT'], image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic1', doctors: 0, status: 'FAOL', rating: 4.8, reviews: 245, distance: 1.2 },
+  { id: 2, name: 'DentTish Premium Clinic', address: 'Navoi ko\'chasi 12-uy, Tashkent', phone: '+998 71 234 56 78', hours: '08:00 - 22:00', services: ['UMUMIY', 'ORTODONTIYA', 'KOSMETIK'], image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic2', doctors: 0, status: 'FAOL', rating: 4.9, reviews: 312, distance: 2.5 },
+  { id: 3, name: 'SmileCare Dental Studio', address: 'Buyuk Ipak yo\'li 56-uy, Tashkent', phone: '+998 71 345 67 89', hours: '10:00 - 20:00', services: ['UMUMIY', 'PROTEZ', 'ENDODONTIYA'], image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic3', doctors: 0, status: 'FAOL', rating: 4.7, reviews: 189, distance: 3.1 },
+  { id: 4, name: 'Bright Smile Clinic', address: 'Mirabad tumani, Qo\'qon ko\'chasi 89-uy, Tashkent', phone: '+998 71 456 78 90', hours: '09:00 - 19:00', services: ['UMUMIY', 'RENTGEN'], image: 'https://api.dicebear.com/7.x/shapes/svg?seed=clinic4', doctors: 0, status: 'FAOL', rating: 4.6, reviews: 156, distance: 4.2 },
 ];
 
 const loadState = (key, fallback) => {
   try {
     const saved = localStorage.getItem(`denttish_${key}`);
     return saved ? JSON.parse(saved) : fallback;
-  } catch {
-    return fallback;
-  }
+  } catch { return fallback; }
 };
 
 export function AppProvider({ children }) {
@@ -90,29 +36,94 @@ export function AppProvider({ children }) {
   const [clinicSettings, setClinicSettings] = useState(() => loadState('settings', defaultSettings));
   const [lastBooking, setLastBooking] = useState(null);
   const [extraCategories, setExtraCategories] = useState(() => loadState('extraCategories', []));
+  const [currentUser, setCurrentUser] = useState(() => loadState('currentUser', null));
+  const [allUsers, setAllUsers] = useState(() => loadState('allUsers', []));
+  const [adminNotifications, setAdminNotifications] = useState(() => loadState('adminNotifications', []));
+  const [userNotifications, setUserNotifications] = useState(() => {
+    const all = loadState('userNotifications', []);
+    const cutoff = Date.now() - 86400000;
+    const fresh = all.filter(n => new Date(n.time).getTime() > cutoff);
+    if (fresh.length !== all.length) localStorage.setItem('denttish_userNotifications', JSON.stringify(fresh));
+    return fresh.slice(0, 20);
+  });
 
   useEffect(() => { localStorage.setItem('denttish_doctors', JSON.stringify(doctors)) }, [doctors]);
   useEffect(() => { localStorage.setItem('denttish_appointments', JSON.stringify(appointments)) }, [appointments]);
   useEffect(() => { localStorage.setItem('denttish_clinics', JSON.stringify(clinics)) }, [clinics]);
   useEffect(() => { localStorage.setItem('denttish_settings', JSON.stringify(clinicSettings)) }, [clinicSettings]);
   useEffect(() => { localStorage.setItem('denttish_extraCategories', JSON.stringify(extraCategories)) }, [extraCategories]);
+  useEffect(() => { localStorage.setItem('denttish_currentUser', JSON.stringify(currentUser)) }, [currentUser]);
+  useEffect(() => { localStorage.setItem('denttish_allUsers', JSON.stringify(allUsers)) }, [allUsers]);
+  useEffect(() => { localStorage.setItem('denttish_adminNotifications', JSON.stringify(adminNotifications)) }, [adminNotifications]);
+  useEffect(() => { localStorage.setItem('denttish_userNotifications', JSON.stringify(userNotifications)) }, [userNotifications]);
 
-  // Doctor CRUD
+  // Notifications
+  const addAdminNotification = useCallback((message, type = 'info') => {
+    const notif = { id: Date.now(), message, type, time: new Date().toISOString(), read: false };
+    setAdminNotifications(prev => [notif, ...prev].slice(0, 50));
+  }, []);
+
+  const clearAdminNotification = useCallback((id) => {
+    setAdminNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
+
+  const markAllAdminRead = useCallback(() => {
+    setAdminNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  }, []);
+
+  const addUserNotification = useCallback((message, type = 'info') => {
+    const notif = { id: Date.now(), message, type, time: new Date().toISOString(), read: false };
+    setUserNotifications(prev => [notif, ...prev].slice(0, 50));
+  }, []);
+
+  const clearUserNotification = useCallback((id) => {
+    setUserNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
+
+  const markUserNotificationRead = useCallback((id) => {
+    setUserNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  }, []);
+
+  const markAllUserNotificationsRead = useCallback(() => {
+    setUserNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  }, []);
+
+  const clearAllUserNotifications = useCallback(() => {
+    setUserNotifications([]);
+    localStorage.setItem('denttish_userNotifications', '[]');
+  }, []);
+
+  // User registration
+  const registerUser = useCallback((name, phone) => {
+    const user = { name, phone, registeredAt: new Date().toISOString() };
+    setCurrentUser(user);
+    setAllUsers(prev => {
+      if (prev.some(u => u.name === name && u.phone === phone)) return prev;
+      return [...prev, user];
+    });
+    addUserNotification(`Xush kelibsiz, ${name}! DentTish ilovasiga muvaffaqiyatli ro'yxatdan o'tdingiz.`, 'welcome');
+  }, [addUserNotification]);
+
+  const updateCurrentUser = useCallback((name, phone) => {
+    setCurrentUser(prev => {
+      const updated = { ...prev, name, phone };
+      return updated;
+    });
+    setAllUsers(prev => prev.map(u =>
+      u.name === currentUser?.name && u.phone === currentUser?.phone
+        ? { ...u, name, phone }
+        : u
+    ));
+  }, [currentUser]);
+
+  // Doctor CRUD (with notifications)
   const addDoctor = (doctor) => {
     const id = doctors.length > 0 ? Math.max(...doctors.map(d => d.id)) + 1 : 1;
-    const initials = doctor.name
-      .replace('Dr. ', '')
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase();
+    const initials = doctor.name.replace('Dr. ', '').split(' ').map(n => n[0]).join('').toUpperCase();
     const bgColors = ['bg-blue-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-teal-500', 'bg-indigo-500', 'bg-pink-500', 'bg-orange-500'];
     const avatarBg = bgColors[id % bgColors.length];
     const newDoctor = {
-      ...doctor,
-      id,
-      avatar: initials,
-      avatarBg,
+      ...doctor, id, avatar: initials, avatarBg,
       rating: parseFloat((4 + Math.random()).toFixed(1)),
       reviews: Math.floor(Math.random() * 200) + 20,
       patients: `${Math.floor(Math.random() * 5) + 1}.${Math.floor(Math.random() * 10)}k+`,
@@ -124,6 +135,7 @@ export function AppProvider({ children }) {
       workingHours: doctor.workingHours || '09:00 - 18:00',
     };
     setDoctors([...doctors, newDoctor]);
+    addAdminNotification(`Yangi shifokor qo'shildi: ${newDoctor.name}`, 'doctor_add');
   };
 
   const updateDoctor = (id, updatedData) => {
@@ -131,10 +143,14 @@ export function AppProvider({ children }) {
   };
 
   const deleteDoctor = (id) => {
+    const doc = doctors.find(d => d.id === id);
+    if (doc) {
+      addAdminNotification(`Shifokor ishdan olindi: ${doc.name}`, 'doctor_remove');
+    }
     setDoctors(doctors.filter(d => d.id !== id));
   };
 
-  // Appointment CRUD
+  // Appointment CRUD (with user notification)
   const addAppointment = (appointment) => {
     const id = appointments.length > 0 ? Math.max(...appointments.map(a => a.id)) + 1 : 1;
     const statusColors = {
@@ -144,14 +160,15 @@ export function AppProvider({ children }) {
       'Bekor qilindi': 'bg-red-100 text-red-800',
     };
     const newAppointment = {
-      ...appointment,
-      id,
+      ...appointment, id,
       initials: appointment.patient.split(' ').map(n => n[0]).join('').toUpperCase(),
       phone: appointment.phone || '',
       statusColor: statusColors[appointment.status] || statusColors['Kutilmoqda'],
     };
     setAppointments([...appointments, newAppointment]);
     setLastBooking(newAppointment);
+    addUserNotification(`Siz ${appointment.doctor} qabuliga yozildingiz (${appointment.date}, ${appointment.time})`, 'booking');
+    addAdminNotification(`${appointment.patient} ${appointment.doctor} qabuliga yozildi`, 'booking');
   };
 
   const updateAppointment = (id, updatedData) => {
@@ -178,14 +195,7 @@ export function AppProvider({ children }) {
   // Clinic CRUD
   const addClinic = (clinic) => {
     const id = clinics.length > 0 ? Math.max(...clinics.map(c => c.id)) + 1 : 1;
-    const newClinic = {
-      ...clinic,
-      id,
-      doctors: 0,
-      rating: 4.5,
-      reviews: 0,
-      image: `https://api.dicebear.com/7.x/shapes/svg?seed=clinic${id}`,
-    };
+    const newClinic = { ...clinic, id, doctors: 0, rating: 4.5, reviews: 0, image: `https://api.dicebear.com/7.x/shapes/svg?seed=clinic${id}` };
     setClinics([...clinics, newClinic]);
   };
 
@@ -220,16 +230,14 @@ export function AppProvider({ children }) {
     }
   };
 
-  const getStatistics = () => {
-    return {
-      totalDoctors: doctors.length,
-      activeDoctors: doctors.filter(d => d.status === 'FAOL').length,
-      inactiveDoctors: doctors.filter(d => d.status === 'NOFAOL').length,
-      totalAppointments: appointments.length,
-      totalClinics: clinics.length,
-      todayAppointments: appointments.filter(a => a.status === 'Tasdiqlangan').length,
-    };
-  };
+  const getStatistics = () => ({
+    totalDoctors: doctors.length,
+    activeDoctors: doctors.filter(d => d.status === 'FAOL').length,
+    inactiveDoctors: doctors.filter(d => d.status === 'NOFAOL').length,
+    totalAppointments: appointments.length,
+    totalClinics: clinics.length,
+    todayAppointments: appointments.filter(a => a.status === 'Tasdiqlangan').length,
+  });
 
   const value = {
     doctors, setDoctors, addDoctor, updateDoctor, deleteDoctor,
@@ -239,6 +247,12 @@ export function AppProvider({ children }) {
     lastBooking, setLastBooking,
     categories, addCategory: doAddCategory, removeCategory: doRemoveCategory,
     getStatistics,
+    // User system
+    currentUser, setCurrentUser, registerUser, updateCurrentUser, allUsers,
+    // Notifications
+    adminNotifications, addAdminNotification, clearAdminNotification, markAllAdminRead,
+    userNotifications, addUserNotification, clearUserNotification, markUserNotificationRead,
+    markAllUserNotificationsRead, clearAllUserNotifications,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -246,8 +260,6 @@ export function AppProvider({ children }) {
 
 export function useAppContext() {
   const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useAppContext must be used within AppProvider');
-  }
+  if (!context) throw new Error('useAppContext must be used within AppProvider');
   return context;
 }

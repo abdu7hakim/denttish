@@ -31,12 +31,10 @@ function generateSlots(start, end) {
 export default function BookingPage() {
   const navigate = useNavigate()
   const { doctorId } = useParams()
-  const { doctors, appointments, addAppointment } = useAppContext()
+  const { doctors, appointments, addAppointment, currentUser } = useAppContext()
   const doctor = doctors.find(d => d.id === parseInt(doctorId))
 
   const [step, setStep] = useState(1)
-  const [patientName, setPatientName] = useState('')
-  const [patientPhone, setPatientPhone] = useState('')
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedSlot, setSelectedSlot] = useState(null)
 
@@ -72,11 +70,11 @@ export default function BookingPage() {
   }
 
   const handleConfirm = () => {
-    if (!patientName.trim() || !patientPhone.trim() || !selectedDate || !selectedSlot) return
+    if (!selectedDate || !selectedSlot || !currentUser) return
 
     addAppointment({
-      patient: patientName.trim(),
-      phone: patientPhone.trim(),
+      patient: currentUser.name,
+      phone: currentUser.phone,
       doctor: doctor.name,
       doctorId: doctor.id,
       clinic: doctor.clinic,
@@ -95,32 +93,32 @@ export default function BookingPage() {
     )
   }
 
+  const steps = [
+    { key: 1, label: 'Sana tanlash' },
+    { key: 2, label: 'Vaqt tanlash' },
+    { key: 3, label: 'Tasdiqlash' },
+  ]
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
       <div className="pb-24">
-        {/* Steps indicator */}
         <div className="bg-white px-4 py-3 border-b sticky top-0 z-10">
           <div className="flex items-center gap-3 mb-3">
             <button onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)} className="text-primary">
               <ArrowLeft size={24} />
             </button>
-            <h1 className="text-lg font-bold flex-1">
-              {step === 1 && 'Ma\'lumotlaringiz'}
-              {step === 2 && 'Sana tanlash'}
-              {step === 3 && 'Vaqt tanlash'}
-              {step === 4 && 'Tasdiqlash'}
-            </h1>
+            <h1 className="text-lg font-bold flex-1">{steps.find(s => s.key === step)?.label}</h1>
           </div>
           <div className="flex gap-1.5">
-            {[1, 2, 3, 4].map(s => (
-              <div key={s} className={`flex-1 h-1.5 rounded-full ${s <= step ? 'bg-primary' : 'bg-gray-200'}`} />
+            {steps.map(s => (
+              <div key={s.key} className={`flex-1 h-1.5 rounded-full ${s.key <= step ? 'bg-primary' : 'bg-gray-200'}`} />
             ))}
           </div>
         </div>
 
-        {/* Doctor summary */}
+        {/* Doctor + User summary */}
         <div className="bg-white px-4 py-3 border-b flex items-center gap-3">
           {doctor.image ? (
             <img src={doctor.image} alt={doctor.name} className="w-10 h-10 rounded-full object-cover" />
@@ -133,55 +131,17 @@ export default function BookingPage() {
             <p className="font-bold text-sm truncate">{doctor.name}</p>
             <p className="text-xs text-gray-500">{doctor.clinic} • {doctor.workingHours}</p>
           </div>
+          {currentUser && (
+            <div className="text-right text-xs text-gray-400">
+              <p>{currentUser.name}</p>
+              <p>{currentUser.phone}</p>
+            </div>
+          )}
         </div>
 
         <div className="p-4">
-          {/* Step 1: Patient Info */}
+          {/* Step: Date */}
           {step === 1 && (
-            <div className="space-y-4">
-              <p className="text-sm text-gray-600">Qabulga yozilish uchun ma'lumotlaringizni kiriting</p>
-              <div className="bg-white rounded-xl p-4 border border-gray-100 space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">Ism familya</label>
-                  <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2.5 border border-gray-200">
-                    <User size={18} className="text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Masalan: Azizbek Nazirov"
-                      value={patientName}
-                      onChange={(e) => setPatientName(e.target.value)}
-                      className="flex-1 bg-transparent outline-none text-sm"
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">Telefon raqam</label>
-                  <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2.5 border border-gray-200">
-                    <Phone size={18} className="text-gray-400" />
-                    <input
-                      type="tel"
-                      placeholder="Masalan: +998 90 123 45 67"
-                      value={patientPhone}
-                      onChange={(e) => setPatientPhone(e.target.value)}
-                      className="flex-1 bg-transparent outline-none text-sm"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setStep(2)}
-                disabled={!patientName.trim() || !patientPhone.trim()}
-                className="w-full bg-primary text-white py-3.5 rounded-xl font-bold text-lg hover:bg-blue-700 transition shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                Davom etish
-              </button>
-            </div>
-          )}
-
-          {/* Step 2: Date */}
-          {step === 2 && (
             <div className="space-y-2">
               <p className="text-sm text-gray-600 mb-3">Qaysi kunga yozilmoqchisiz?</p>
               {dates.map((d, i) => {
@@ -189,7 +149,7 @@ export default function BookingPage() {
                 return (
                   <button
                     key={i}
-                    onClick={() => { if (working) { setSelectedDate(d); setStep(3) } }}
+                    onClick={() => { if (working) { setSelectedDate(d); setStep(2) } }}
                     disabled={!working}
                     className={`w-full bg-white rounded-xl p-4 flex items-center justify-between border-2 transition text-left ${
                       !working ? 'border-gray-100 opacity-50 cursor-not-allowed' :
@@ -211,8 +171,8 @@ export default function BookingPage() {
             </div>
           )}
 
-          {/* Step 3: Time */}
-          {step === 3 && (
+          {/* Step: Time */}
+          {step === 2 && (
             <div>
               <p className="text-sm text-gray-600 mb-3">
                 {selectedDate?.toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' })} — bo'sh vaqtlar:
@@ -228,7 +188,7 @@ export default function BookingPage() {
                     return (
                       <button
                         key={t}
-                        onClick={() => { if (!booked) { setSelectedSlot(t); setStep(4) } }}
+                        onClick={() => { if (!booked) { setSelectedSlot(t); setStep(3) } }}
                         disabled={booked}
                         className={`py-3 rounded-xl font-semibold border-2 transition ${
                           selectedSlot === t ? 'border-primary bg-primary text-white' :
@@ -245,20 +205,20 @@ export default function BookingPage() {
             </div>
           )}
 
-          {/* Step 4: Confirm */}
-          {step === 4 && (
+          {/* Step: Confirm */}
+          {step === 3 && (
             <div className="space-y-4">
               <div className="bg-white rounded-xl p-5 space-y-4 border border-gray-100">
                 <div className="flex items-center gap-3">
                   <User size={20} className="text-primary" />
-                  <div><p className="text-xs text-gray-500">Bemor</p><p className="font-bold text-gray-900">{patientName}</p></div>
+                  <div><p className="text-xs text-gray-500">Bemor</p><p className="font-bold text-gray-900">{currentUser?.name}</p></div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone size={20} className="text-primary" />
-                  <div><p className="text-xs text-gray-500">Telefon</p><p className="font-bold text-gray-900">{patientPhone}</p></div>
+                  <div><p className="text-xs text-gray-500">Telefon</p><p className="font-bold text-gray-900">{currentUser?.phone}</p></div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <User size={20} className="text-primary" />
+                  <Calendar size={20} className="text-primary" />
                   <div><p className="text-xs text-gray-500">Shifokor</p><p className="font-bold text-gray-900">{doctor.name}</p></div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -281,13 +241,6 @@ export default function BookingPage() {
               >
                 <CheckCircle size={22} />
                 Qabulni tasdiqlash
-              </button>
-
-              <button
-                onClick={() => setStep(1)}
-                className="w-full text-gray-500 py-2 text-sm hover:text-gray-700"
-              >
-                Ma'lumotlarni o'zgartirish
               </button>
             </div>
           )}

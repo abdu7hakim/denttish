@@ -19,6 +19,7 @@ import DoctorsManagement from './admin/pages/DoctorsManagement'
 import AppointmentsManagement from './admin/pages/AppointmentsManagement'
 import AdminSettings from './admin/pages/AdminSettings'
 import CategoriesManagement from './admin/pages/CategoriesManagement'
+import UserManagement from './admin/pages/UserManagement'
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
           <Route path="/admin/doctors" element={<ProtectedRoute><DoctorsManagement /></ProtectedRoute>} />
           <Route path="/admin/appointments" element={<ProtectedRoute><AppointmentsManagement /></ProtectedRoute>} />
           <Route path="/admin/categories" element={<ProtectedRoute><CategoriesManagement /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
           <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
         </Routes>
       </Router>

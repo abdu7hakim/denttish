@@ -40,6 +40,12 @@ export default function AdminSidebar({ isOpen, toggleSidebar }) {
       key: 'categories',
     },
     {
+      label: 'Foydalanuvchilar',
+      icon: Users,
+      path: '/admin/users',
+      key: 'users',
+    },
+    {
       label: 'Sozlamalar',
       icon: Settings,
       path: '/admin/settings',

@@ -1,81 +1,50 @@
-import { ArrowLeft, Trash2, Check } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { ArrowLeft, Trash2, Check, Calendar, Bell, User } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useAppContext } from '../context/AppContext'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 
+function timeAgo(time) {
+  const diff = Date.now() - new Date(time).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'Hozir'
+  if (mins < 60) return `${mins} daqiqa oldin`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours} soat oldin`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days} kun oldin`
+  return new Date(time).toLocaleDateString('uz-UZ')
+}
+
+const typeIcons = {
+  welcome: User,
+  booking: Calendar,
+}
+
+const typeColors = {
+  welcome: 'text-green-600 bg-green-100',
+  booking: 'text-blue-600 bg-blue-100',
+}
+
+const tabs = [
+  { key: 'all', label: 'Hammasi' },
+  { key: 'unread', label: "O'qilmagan" },
+  { key: 'booking', label: 'Uchrashuvlar' },
+]
+
 export default function NotificationsPage() {
   const navigate = useNavigate()
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'appointment',
-      title: 'Band qilish rasmiylashtirildi',
-      desc: 'Dr. Sarah Jenkins bilan 24-oktabr 10:00 da uchrashuv rasmiylashtirindi',
-      time: '2 soat oldin',
-      read: false,
-      icon: '📅',
-    },
-    {
-      id: 2,
-      type: 'reminder',
-      title: 'Uchrashuvga eslatma',
-      desc: 'Ertaga Dr. Marcus Vance bilan uchrashuv mavjud. Vaqt: 15:30',
-      time: '1 kun oldin',
-      read: false,
-      icon: '🔔',
-    },
-    {
-      id: 3,
-      type: 'promo',
-      title: 'Maxsus taklif!',
-      desc: 'Bu hafta tish tozalashga 20% chegirma. Foydalaning!',
-      time: '3 kun oldin',
-      read: true,
-      icon: '🎉',
-    },
-    {
-      id: 4,
-      type: 'result',
-      title: 'Rentgen natijalaringiz tayyor',
-      desc: 'Sizning panoramik rentgen natijalaringiz tahlil qilingan va tayyor',
-      time: '1 hafta oldin',
-      read: true,
-      icon: '📸',
-    },
-    {
-      id: 5,
-      type: 'message',
-      title: 'Shifokor soramasiga javob',
-      desc: 'Dr. Elena Rostova: "Siz hozir dori qabul qilyapsizmi?"',
-      time: '1 hafta oldin',
-      read: true,
-      icon: '💬',
-    },
-    {
-      id: 6,
-      type: 'appointment',
-      title: 'Band qilish bekor qilindi',
-      desc: 'Sizning 15-oktabr dagi Dr. Ahmed Hassan bilan uchrashuv bekor qilingan',
-      time: '2 hafta oldin',
-      read: true,
-      icon: '❌',
-    },
-  ])
+  const { userNotifications, clearUserNotification, markUserNotificationRead, markAllUserNotificationsRead, clearAllUserNotifications } = useAppContext()
+  const [activeTab, setActiveTab] = useState('all')
 
-  const markAsRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((notif) =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    )
-  }
+  const filtered = userNotifications.filter(n => {
+    if (activeTab === 'unread') return !n.read
+    if (activeTab === 'booking') return n.type === 'booking'
+    return true
+  })
 
-  const deleteNotification = (id) => {
-    setNotifications((prev) => prev.filter((notif) => notif.id !== id))
-  }
-
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const unreadCount = userNotifications.filter(n => !n.read).length
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -90,81 +59,97 @@ export default function NotificationsPage() {
             </button>
             <h1 className="text-2xl font-bold flex-1">Bildirishnomalar</h1>
             {unreadCount > 0 && (
-              <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                {unreadCount}
-              </span>
+              <button
+                onClick={markAllUserNotificationsRead}
+                className="text-xs text-primary font-semibold hover:underline"
+              >
+                Hammasini o'qildi
+              </button>
+            )}
+            {userNotifications.length > 0 && (
+              <button onClick={clearAllUserNotifications} className="text-xs text-red-500 font-semibold hover:underline">
+                Tozalash
+              </button>
             )}
           </div>
         </div>
 
         {/* Filter Tabs */}
-        <div className="bg-white border-b sticky top-16 z-10">
-          <div className="flex overflow-x-auto px-4">
-            {['Hammasi', 'O\'qilmagan', 'Uchrashuvlar', 'Xabarlar'].map((tab) => (
+        <div className="bg-white border-b sticky top-[60px] z-10">
+          <div className="flex px-4">
+            {tabs.map(tab => (
               <button
-                key={tab}
-                className="px-4 py-3 text-sm font-semibold border-b-2 border-transparent hover:border-primary text-gray-600 whitespace-nowrap"
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === tab.key
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
               >
-                {tab}
+                {tab.label}
+                {tab.key === 'unread' && unreadCount > 0 && (
+                  <span className="ml-1.5 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{unreadCount}</span>
+                )}
               </button>
             ))}
           </div>
         </div>
 
         {/* Notifications List */}
-        <div className="divide-y">
-          {notifications.length === 0 ? (
-            <div className="p-8 text-center">
-              <p className="text-gray-400 text-lg">
-                Bildirishnomalar yo'q
-              </p>
+        <div className="divide-y divide-gray-100">
+          {filtered.length === 0 ? (
+            <div className="p-12 text-center">
+              <Bell size={40} className="mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-400 text-lg">Bildirishnomalar yo'q</p>
             </div>
           ) : (
-            notifications.map((notif) => (
-              <div
-                key={notif.id}
-                className={`p-4 hover:bg-gray-100 transition ${
-                  !notif.read ? 'bg-blue-50' : 'bg-white'
-                }`}
-              >
-                <div className="flex gap-3">
-                  <div className="text-2xl flex-shrink-0">{notif.icon}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <h3 className={`font-bold text-sm ${!notif.read ? 'text-primary' : ''}`}>
-                        {notif.title}
-                      </h3>
-                      {!notif.read && (
-                        <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-2" />
-                      )}
+            filtered.map(notif => {
+              const Icon = typeIcons[notif.type] || Bell
+              const color = typeColors[notif.type] || 'text-gray-600 bg-gray-100'
+              return (
+                <div
+                  key={notif.id}
+                  className={`p-4 hover:bg-gray-50 transition ${!notif.read ? 'bg-blue-50/50' : 'bg-white'}`}
+                >
+                  <div className="flex gap-3">
+                    <div className={`p-2 rounded-full ${color} flex-shrink-0 self-start`}>
+                      <Icon size={16} />
                     </div>
-                    <p className="text-xs text-gray-600 mb-2 line-clamp-2">
-                      {notif.desc}
-                    </p>
-                    <p className="text-xs text-gray-400 mb-2">{notif.time}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <p className={`text-sm ${!notif.read ? 'font-bold text-gray-900' : 'text-gray-800'}`}>
+                          {notif.message}
+                        </p>
+                        {!notif.read && (
+                          <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1.5" />
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-400">{timeAgo(notif.time)}</p>
 
-                    <div className="flex gap-2">
-                      {!notif.read && (
+                      <div className="flex gap-2 mt-2">
+                        {!notif.read && (
+                          <button
+                            onClick={() => markUserNotificationRead(notif.id)}
+                            className="flex items-center gap-1 text-xs text-primary font-semibold px-2 py-1 rounded hover:bg-blue-50"
+                          >
+                            <Check size={14} />
+                            O'qildi
+                          </button>
+                        )}
                         <button
-                          onClick={() => markAsRead(notif.id)}
-                          className="flex items-center gap-1 text-xs text-primary font-semibold hover:bg-white px-2 py-1 rounded"
+                          onClick={() => clearUserNotification(notif.id)}
+                          className="flex items-center gap-1 text-xs text-red-600 font-semibold px-2 py-1 rounded hover:bg-red-50"
                         >
-                          <Check size={14} />
-                          O'qildi deb belgilash
+                          <Trash2 size={14} />
+                          O'chirish
                         </button>
-                      )}
-                      <button
-                        onClick={() => deleteNotification(notif.id)}
-                        className="flex items-center gap-1 text-xs text-red-600 font-semibold hover:bg-white px-2 py-1 rounded"
-                      >
-                        <Trash2 size={14} />
-                        O'chirish
-                      </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
+              )
+            })
           )}
         </div>
       </div>
