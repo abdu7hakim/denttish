@@ -53,3 +53,8 @@ export const apiAddCategory = (name) => req('POST', '/categories', { name });
 export const apiDeleteCategory = (name) => req('DELETE', `/categories/${encodeURIComponent(name)}`);
 
 export const apiGetStatistics = () => req('GET', '/statistics');
+
+export const apiGetClinics = () => req('GET', '/clinics');
+export const apiAddClinic = (data) => req('POST', '/clinics', data);
+export const apiUpdateClinic = (id, data) => req('PUT', `/clinics/${id}`, data);
+export const apiDeleteClinic = (id) => req('DELETE', `/clinics/${id}`);
